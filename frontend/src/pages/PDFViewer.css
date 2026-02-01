@@ -1,0 +1,47 @@
+.pdf-viewer-page {
+    height: calc(100vh - var(--space-3xl) * 2);
+    display: flex;
+    flex-direction: column;
+}
+
+.pdf-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.pdf-header h2 {
+    flex: 1;
+}
+
+.pdf-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.pdf-container {
+    flex: 1;
+    background-color: var(--surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.pdf-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.loading-state,
+.error-state {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    background-color: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3xl);
+}

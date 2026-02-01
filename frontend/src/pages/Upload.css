@@ -1,0 +1,88 @@
+.upload-page h1 {
+    margin-bottom: var(--space-2xl);
+}
+
+.dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    background-color: var(--surface);
+    margin-bottom: var(--space-2xl);
+}
+
+.dropzone:hover,
+.dropzone.active {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    transform: scale(1.01);
+}
+
+.dropzone-text {
+    margin: var(--space-lg) 0 var(--space-sm);
+    font-size: var(--font-h3);
+    color: var(--text-primary);
+}
+
+.dropzone-hint {
+    color: var(--text-secondary);
+    font-size: var(--font-small);
+}
+
+.upload-queue h2 {
+    margin-bottom: var(--space-lg);
+}
+
+.upload-item {
+    margin-bottom: var(--space-lg);
+}
+
+.upload-item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.upload-info {
+    flex: 1;
+}
+
+.upload-filename {
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: var(--background);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: var(--space-sm) 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.upload-status {
+    margin-top: var(--space-sm);
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-sm);
+    color: var(--error);
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.remove-btn:hover {
+    background-color: var(--background);
+}

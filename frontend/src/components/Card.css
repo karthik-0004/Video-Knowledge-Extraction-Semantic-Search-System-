@@ -1,0 +1,25 @@
+/* Clean Card Component */
+.card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+}
+
+/* Hover Effect */
+.card.hover:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    cursor: pointer;
+}
+
+/* Card variants */
+.card.primary {
+    background: var(--surface);
+}
+
+.card.accent {
+    border-left: 3px solid var(--primary);
+}

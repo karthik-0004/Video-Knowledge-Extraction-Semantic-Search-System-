@@ -1,0 +1,71 @@
+.profile-page h1 {
+    margin-bottom: var(--space-2xl);
+}
+
+.profile-card {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+}
+
+.profile-avatar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+}
+
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.profile-info h2 {
+    margin-bottom: var(--space-sm);
+}
+
+.profile-info p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.member-since {
+    font-size: var(--font-small);
+}
+
+.profile-page h2 {
+    margin-bottom: var(--space-xl);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-xl);
+}
+
+.stat-card {
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: var(--space-sm) 0;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: var(--font-small);
+}
