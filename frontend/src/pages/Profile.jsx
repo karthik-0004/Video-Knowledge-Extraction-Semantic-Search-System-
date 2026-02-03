@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/AppLayout';
 import { Card } from '../components/Card';
 import { useAuth } from '../context/AuthContext';
 import { profileAPI } from '../services/api';
-import { User as UserIcon } from 'lucide-react';
+import { Mail, LogOut, RefreshCw, Shield } from 'lucide-react';
 import './Profile.css';
 
 export const Profile = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [stats, setStats] = useState({
         total_videos: 0,
         total_queries: 0,
@@ -25,15 +27,28 @@ export const Profile = () => {
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
     };
 
+    const handleLogout = () => {
+        if (window.confirm('Are you sure you want to sign out?')) {
+            logout();
+        }
+    };
+
+    const handleSwitchAccount = () => {
+        if (window.confirm('Switch to a different Google account? You will be logged out.')) {
+            logout();
+        }
+    };
+
     return (
         <AppLayout>
             <div className="profile-page">
-                <h1>Profile</h1>
+                <h1>My Account</h1>
 
-                <Card className="profile-card">
-                    <div className="profile-avatar">
-                        {user.avatar ? (
-                            <img src={user.avatar} alt={user.name} />
+                {/* Profile Header */}
+                <div className="profile-header-card">
+                    <div className="profile-avatar-large">
+                        {user.picture ? (
+                            <img src={user.picture} alt={user.name} />
                         ) : (
                             <div className="avatar-placeholder">
                                 {getInitials(user.name)}
@@ -41,38 +56,69 @@ export const Profile = () => {
                         )}
                     </div>
 
-                    <div className="profile-info">
+                    <div className="profile-header-info">
                         <h2>{user.name}</h2>
-                        <p>{user.email}</p>
-                        <p className="member-since">Member since Jan 2026</p>
+                        <p className="profile-email">
+                            <Mail size={20} />
+                            {user.email}
+                        </p>
+                        <div className="profile-badge">
+                            <Shield size={16} />
+                            Google Account Connected
+                        </div>
                     </div>
-                </Card>
+                </div>
 
-                <h2>Activity Statistics</h2>
-                <div className="stats-grid">
-                    <Card className="stat-card">
-                        <div className="stat-icon">📹</div>
-                        <div className="stat-value">{stats.total_videos}</div>
-                        <div className="stat-label">Videos Converted</div>
-                    </Card>
+                {/* Account Management */}
+                <div className="account-section">
+                    <h2>Account Management</h2>
+                    <div className="account-actions">
+                        <div className="action-card" onClick={handleSwitchAccount}>
+                            <div className="action-card-icon">
+                                <RefreshCw size={24} />
+                            </div>
+                            <h3>Switch Account</h3>
+                            <p>Sign out and login with a different Google account</p>
+                        </div>
 
-                    <Card className="stat-card">
-                        <div className="stat-icon">💬</div>
-                        <div className="stat-value">{stats.total_queries}</div>
-                        <div className="stat-label">Queries Asked</div>
-                    </Card>
+                        <div className="action-card" onClick={handleLogout}>
+                            <div className="action-card-icon">
+                                <LogOut size={24} />
+                            </div>
+                            <h3>Sign Out</h3>
+                            <p>Logout from your current session</p>
+                        </div>
+                    </div>
+                </div>
 
-                    <Card className="stat-card">
-                        <div className="stat-icon">📄</div>
-                        <div className="stat-value">{stats.total_pdfs}</div>
-                        <div className="stat-label">PDFs Generated</div>
-                    </Card>
+                {/* Statistics */}
+                <div className="stats-section">
+                    <h2>Your Activity</h2>
+                    <div className="stats-grid">
+                        <Card className="stat-card">
+                            <div className="stat-icon">🎥</div>
+                            <div className="stat-value">{stats.total_videos}</div>
+                            <div className="stat-label">Videos Processed</div>
+                        </Card>
 
-                    <Card className="stat-card">
-                        <div className="stat-icon">⏱️</div>
-                        <div className="stat-value">{stats.total_processing_hours.toFixed(1)}</div>
-                        <div className="stat-label">Hours Processed</div>
-                    </Card>
+                        <Card className="stat-card">
+                            <div className="stat-icon">💬</div>
+                            <div className="stat-value">{stats.total_queries}</div>
+                            <div className="stat-label">Questions Asked</div>
+                        </Card>
+
+                        <Card className="stat-card">
+                            <div className="stat-icon">📄</div>
+                            <div className="stat-value">{stats.total_pdfs}</div>
+                            <div className="stat-label">PDFs Generated</div>
+                        </Card>
+
+                        <Card className="stat-card">
+                            <div className="stat-icon">⏱️</div>
+                            <div className="stat-value">{stats.total_processing_hours.toFixed(1)}</div>
+                            <div className="stat-label">Hours Processed</div>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </AppLayout>

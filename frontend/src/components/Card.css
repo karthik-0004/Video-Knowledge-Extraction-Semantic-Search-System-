@@ -1,18 +1,24 @@
-/* Clean Card Component */
+/* Clean Card Component - Minimal Style */
 .card {
-    background: white;
+    background: var(--card-bg);
+    border-radius: 4px;
+    padding: 1rem;
+    box-shadow: none;
+    transition: all 0.2s ease;
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-base);
 }
 
-/* Hover Effect */
-.card.hover:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+.card.hover {
     cursor: pointer;
+}
+
+.card.hover:hover {
+    border-color: #1A1A1A;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.card.flat {
+    box-shadow: none;
 }
 
 /* Card variants */

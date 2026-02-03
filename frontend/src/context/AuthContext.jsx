@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
@@ -11,18 +11,43 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-    // Placeholder user data (will be replaced with Google Auth later)
-    const [user] = useState({
-        id: 1,
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: null,
-    });
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const [isAuthenticated] = useState(true); // Always true for now
+    useEffect(() => {
+        // Check if user is logged in (from localStorage)
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            try {
+                setUser(JSON.parse(savedUser));
+            } catch (error) {
+                localStorage.removeItem('user');
+            }
+        }
+        setLoading(false);
+    }, []);
+
+    const login = (googleUser) => {
+        const userData = {
+            name: googleUser.name,
+            email: googleUser.email,
+            picture: googleUser.picture,
+            googleId: googleUser.sub,
+        };
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+    };
+
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    };
+
+    const isAuthenticated = !!user;
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated }}>
+        <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,14 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/AppLayout';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
+import { ProcessingScreen } from '../components/ProcessingScreen';
 import { videoAPI } from '../services/api';
 import { Upload as UploadIcon, X } from 'lucide-react';
 import './Upload.css';
 
 export const Upload = () => {
+    const navigate = useNavigate();
     const [uploadQueue, setUploadQueue] = useState([]);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [processingStage, setProcessingStage] = useState('uploaded');
+
+    // Poll for status updates for processing items
+    useEffect(() => {
+        const processingItem = uploadQueue.find(item => item.status === 'processing');
+
+        if (processingItem && processingItem.videoId) {
+            setIsProcessing(true);
+            const interval = setInterval(async () => {
+                try {
+                    const response = await videoAPI.getVideoStatus(processingItem.videoId);
+                    const { status, processing_stage } = response.data;
+
+                    if (processing_stage) {
+                        setProcessingStage(processing_stage);
+                    }
+
+                    if (status === 'completed') {
+                        clearInterval(interval);
+                        navigate('/dashboard');
+                    } else if (status === 'failed') {
+                        clearInterval(interval);
+                        setIsProcessing(false);
+                        setUploadQueue(prev => prev.map(i =>
+                            i.id === processingItem.id
+                                ? { ...i, status: 'failed', message: 'Processing failed' }
+                                : i
+                        ));
+                    }
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                }
+            }, 2000); // Check every 2 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [uploadQueue, navigate]);
 
     const onDrop = (acceptedFiles) => {
         acceptedFiles.forEach(file => {
@@ -29,9 +70,11 @@ export const Upload = () => {
                 ));
             })
                 .then(res => {
+                    // Update validation: backend response should contain video ID
+                    const videoId = res.data.id;
                     setUploadQueue(prev => prev.map(i =>
                         i.id === item.id
-                            ? { ...i, status: 'processing', message: 'Processing...', progress: 100 }
+                            ? { ...i, status: 'processing', message: 'Processing...', progress: 100, videoId }
                             : i
                     ));
                 })
@@ -49,7 +92,8 @@ export const Upload = () => {
         onDrop,
         accept: {
             'video/*': ['.mp4', '.mov', '.avi', '.mkv', '.webm']
-        }
+        },
+        disabled: isProcessing // Disable dropzone while processing
     });
 
     const removeItem = (id) => {
@@ -58,6 +102,16 @@ export const Upload = () => {
 
     return (
         <AppLayout>
+            {isProcessing && (
+                <ProcessingScreen
+                    videos={[
+                        '/assets/first.mp4',
+                        '/assets/second.mp4'
+                    ]}
+                    processingStage={processingStage}
+                />
+            )}
+
             <div className="upload-page">
                 <h1>Upload Video</h1>
 

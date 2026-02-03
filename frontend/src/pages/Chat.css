@@ -53,8 +53,11 @@
 }
 
 .message.user .message-content {
-    background-color: var(--primary);
+    background-color: #000000;
+    /* Black background */
     color: white;
+    border-radius: 4px;
+    /* Square shape */
 }
 
 .message.assistant {
@@ -78,19 +81,25 @@
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     font-family: var(--font-mono);
     font-size: var(--font-small);
-    opacity: 0.9;
+    opacity: 1;
+    color: #000000;
+    /* Strict Black as requested */
+    font-weight: 500;
 }
 
 .typing-indicator {
     display: flex;
     gap: 4px;
+    padding: 0.5rem;
+    /* Give it some space */
 }
 
 .typing-indicator span {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: var(--text-muted);
+    background-color: #000000;
+    /* Black dots for visibility */
     animation: bounce 1.4s infinite;
 }
 

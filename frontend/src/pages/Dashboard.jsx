@@ -76,20 +76,26 @@ export const Dashboard = () => {
                         <div className="stat-label">Total Videos</div>
                     </Card>
 
-                    <Card className="stat-card">
-                        <Clock size={32} color="var(--warning)" />
-                        <div className="stat-value">{videos.filter(v => v.status === 'processing').length}</div>
-                        <div className="stat-label">Processing</div>
+                    <Card className="stat-card" hover onClick={() => navigate('/history')}>
+                        <Clock size={32} color="var(--success)" />
+                        <div className="stat-value">
+                            {videos.filter(v => {
+                                const today = new Date().toDateString();
+                                const videoDate = new Date(v.upload_date).toDateString();
+                                return today === videoDate;
+                            }).length}
+                        </div>
+                        <div className="stat-label">Today's Conversions</div>
                     </Card>
 
                     <Card className="stat-card">
-                        <MessageCircle size={32} color="var(--success)" />
+                        <MessageCircle size={32} color="var(--info)" />
                         <div className="stat-value">{stats.total_queries}</div>
                         <div className="stat-label">Queries</div>
                     </Card>
 
                     <Card className="stat-card">
-                        <FileText size={32} color="var(--info)" />
+                        <FileText size={32} color="var(--warning)" />
                         <div className="stat-value">{stats.total_pdfs}</div>
                         <div className="stat-label">PDFs</div>
                     </Card>
@@ -150,6 +156,14 @@ export const Dashboard = () => {
                                     </div>
                                 </Card>
                             ))}
+                        </div>
+                    )}
+
+                    {videos.length > 0 && (
+                        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                            <Button variant="secondary" onClick={() => navigate('/history')}>
+                                View Full History
+                            </Button>
                         </div>
                     )}
                 </div>

@@ -12,10 +12,14 @@ from django.utils.decorators import method_decorator
 from .models import Video, Query, PDF, UserProfile
 from .serializers import (
     VideoSerializer, VideoListSerializer, QuerySerializer,
-    PDFSerializer, UserProfileSerializer
+    PDFSerializer, UserProfileSerializer, DailyVideosSerializer
 )
 import os
 import logging
+from datetime import datetime, timedelta
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +83,121 @@ class VideoViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error during video upload: {e}", exc_info=True)
             raise
+    
+    @action(detail=False, methods=['get'])
+    def by_date(self, request):
+        """Get videos grouped by upload date"""
+        # Get query parameters
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        days = request.query_params.get('days', 30)  # Default to last 30 days
+        
+        # Filter videos
+        queryset = Video.objects.all()
+        
+        if start_date and end_date:
+            queryset = queryset.filter(upload_date__date__gte=start_date, upload_date__date__lte=end_date)
+        elif start_date:
+            queryset = queryset.filter(upload_date__date__gte=start_date)
+        else:
+            # Default: last N days
+            start_date = datetime.now().date() - timedelta(days=int(days))
+            queryset = queryset.filter(upload_date__date__gte=start_date)
+        
+        # Group by date
+        videos_by_date = {}
+        for video in queryset.order_by('-upload_date'):
+            date_key = video.upload_date.date().isoformat()
+            if date_key not in videos_by_date:
+                videos_by_date[date_key] = []
+            videos_by_date[date_key].append(video)
+        
+        # Format response
+        result = []
+        today = datetime.now().date()
+        yesterday = today - timedelta(days=1)
+        
+        for date_str, videos in videos_by_date.items():
+            date_obj = datetime.fromisoformat(date_str).date()
+            
+            # Human-readable date
+            if date_obj == today:
+                display_date = "Today"
+            elif date_obj == yesterday:
+                display_date = "Yesterday"
+            else:
+                display_date = date_obj.strftime("%B %d, %Y")
+            
+            result.append({
+                'date': date_str,
+                'display_date': display_date,
+                'count': len(videos),
+                'videos': VideoListSerializer(videos, many=True).data
+            })
+        
+        return Response(result)
+    
+    @action(detail=False, methods=['get'])
+    def daily_stats(self, request):
+        """Get daily conversion statistics"""
+        days = int(request.query_params.get('days', 30))
+        start_date = datetime.now().date() - timedelta(days=days)
+        
+        # Get videos grouped by date with counts
+        stats = Video.objects.filter(
+            upload_date__date__gte=start_date
+        ).annotate(
+            date=TruncDate('upload_date')
+        ).values('date').annotate(
+            count=Count('id')
+        ).order_by('-date')
+        
+        # Format response
+        result = []
+        today = datetime.now().date()
+        yesterday = today - timedelta(days=1)
+        
+        for stat in stats:
+            date_obj = stat['date']
+            
+            if date_obj == today:
+                display_date = "Today"
+            elif date_obj == yesterday:
+                display_date = "Yesterday"
+            else:
+                display_date = date_obj.strftime("%B %d, %Y")
+            
+            result.append({
+                'date': date_obj.isoformat(),
+                'display_date': display_date,
+                'count': stat['count']
+            })
+        
+        return Response(result)
+    
+    @action(detail=False, methods=['get'])
+    def date_range(self, request):
+        """Get videos for a specific date or date range"""
+        date = request.query_params.get('date')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        queryset = Video.objects.all()
+        
+        if date:
+            # Single date
+            queryset = queryset.filter(upload_date__date=date)
+        elif start_date and end_date:
+            # Date range
+            queryset = queryset.filter(upload_date__date__gte=start_date, upload_date__date__lte=end_date)
+        else:
+            return Response(
+                {'error': 'Please provide either date or start_date and end_date'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        videos = queryset.order_by('-upload_date')
+        return Response(VideoListSerializer(videos, many=True).data)
     
     def destroy(self, request, *args, **kwargs):
         """Delete video and associated files"""

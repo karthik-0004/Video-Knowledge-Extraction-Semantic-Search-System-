@@ -1,5 +1,6 @@
 .pdf-viewer-page {
-    height: calc(100vh - var(--space-3xl) * 2);
+    height: calc(100vh - 8rem);
+    /* Fixed height (was broken space-3xl) */
     display: flex;
     flex-direction: column;
 }

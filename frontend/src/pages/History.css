@@ -1,0 +1,148 @@
+.history-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+    gap: 0.75rem;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-title svg {
+    color: var(--primary);
+    /* Dark Blue */
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    /* Dark Blue */
+}
+
+.header-subtitle {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+.history-summary {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #FFFFFF;
+    border-radius: 6px;
+    border: 1px solid #E5E7EB;
+    border-left: 3px solid #1A1A1A;
+}
+
+.history-summary p {
+    margin: 0;
+    color: var(--primary);
+    /* Dark Blue */
+    font-size: 0.8125rem;
+}
+
+.history-summary strong {
+    color: var(--primary);
+    /* Dark Blue */
+    font-weight: 600;
+}
+
+.daily-buckets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+
+.loading-state p {
+    color: #6B7280;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.empty-icon {
+    color: #D1D5DB;
+    opacity: 0.5;
+    margin-bottom: 0.5rem;
+    width: 48px;
+    height: 48px;
+}
+
+.empty-state h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: var(--primary);
+    /* Dark Blue */
+}
+
+.empty-state p {
+    margin: 0;
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .history-page {
+        padding: 0.75rem;
+    }
+
+    .history-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-title h1 {
+        font-size: 1.25rem;
+    }
+
+    .header-title {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

@@ -26,10 +26,16 @@ export const PDFViewer = () => {
             .finally(() => setLoading(false));
     }, [id]);
 
+    const getPdfUrl = (fileUrl) => {
+        if (!fileUrl) return '';
+        if (fileUrl.startsWith('http')) return fileUrl;
+        return `http://localhost:8000${fileUrl}`;
+    };
+
     const handleDownload = () => {
         if (pdf?.file) {
             const link = document.createElement('a');
-            link.href = `http://localhost:8000${pdf.file}`;
+            link.href = getPdfUrl(pdf.file);
             link.download = video?.title || 'document.pdf';
             link.click();
         }
@@ -37,7 +43,7 @@ export const PDFViewer = () => {
 
     const handleOpenNewTab = () => {
         if (pdf?.file) {
-            window.open(`http://localhost:8000${pdf.file}`, '_blank');
+            window.open(getPdfUrl(pdf.file), '_blank');
         }
     };
 
@@ -49,32 +55,69 @@ export const PDFViewer = () => {
                         <ArrowLeft size={20} />
                         Back
                     </Button>
-                    <h2>{video?.title || 'PDF Viewer'}</h2>
-                    <div className="pdf-actions">
-                        <Button variant="secondary" onClick={handleOpenNewTab}>
-                            <ExternalLink size={20} />
-                            Open in New Tab
-                        </Button>
-                        <Button onClick={handleDownload}>
-                            <Download size={20} />
-                            Download PDF
-                        </Button>
-                    </div>
+                    <h2>{video?.title || 'PDF Ready'}</h2>
                 </div>
 
                 {loading ? (
-                    <div className="loading-state">Loading PDF...</div>
+                    <div className="loading-state">Preparing your document...</div>
                 ) : pdf ? (
-                    <div className="pdf-container">
-                        <iframe
-                            src={`http://localhost:8000${pdf.file}#toolbar=1&navpanes=0&scrollbar=1`}
-                            title="PDF Viewer"
-                            className="pdf-frame"
-                        />
+                    <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '2rem',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{
+                            background: 'white',
+                            padding: '3rem',
+                            borderRadius: '16px',
+                            boxShadow: 'var(--shadow-lg)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '1.5rem',
+                            maxWidth: '400px',
+                            width: '100%'
+                        }}>
+                            <div style={{
+                                width: '80px',
+                                height: '80px',
+                                background: '#EFF6FF',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--primary)'
+                            }}>
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary)' }}>Document Ready</h3>
+                                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Your comprehensive study guide has been generated.</p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                                <Button onClick={handleOpenNewTab} style={{ width: '100%', justifyContent: 'center' }}>
+                                    <ExternalLink size={20} />
+                                    Open in New Tab
+                                </Button>
+                                <Button variant="secondary" onClick={handleDownload} style={{ width: '100%', justifyContent: 'center' }}>
+                                    <Download size={20} />
+                                    Download PDF
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="error-state">
-                        PDF not found or still generating. Please try again later.
+                        PDF not found. Please try regenerating.
                     </div>
                 )}
             </div>

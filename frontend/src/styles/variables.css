@@ -1,85 +1,61 @@
-/* Navy & Teal Premium Theme - Clean & Professional */
 :root {
-    /* Primary Colors - Teal Accents */
-    --primary: #06b6d4;
-    --primary-dark: #0891b2;
-    --primary-light: #22d3ee;
-    --primary-glow: rgba(6, 182, 212, 0.3);
+    /* Sapphire Mist Theme - Compact Scale */
 
-    /* Navy Colors */
-    --navy: #1e3a8a;
-    --navy-dark: #1e40af;
-    --navy-light: #3b82f6;
+    /* Core Palette */
+    --primary: #0F4C81;
+    --primary-light: #3B82F6;
+    --secondary: #E0F2FE;
 
-    /* Background Colors */
-    --background: #ffffff;
-    --background-alt: #f8fafc;
-    --surface: #f8fafc;
-    --surface-hover: #e2e8f0;
+    /* Functional Colors */
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+    --info: #0F4C81;
 
-    /* Text Colors */
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
-    --text-accent: #06b6d4;
+    /* Backgrounds */
+    --bg-gradient: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+    --bg: #F0F9FF;
+    --surface: rgba(255, 255, 255, 0.7);
+    --card-bg: rgba(255, 255, 255, 0.6);
 
-    /* Semantic Colors */
-    --success: #10b981;
-    --warning: #f59e0b;
-    --error: #ef4444;
-    --info: #06b6d4;
+    /* Borders & Glass */
+    --border: rgba(15, 76, 129, 0.1);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --backdrop-blur: 16px;
 
-    /* Border & Divider */
-    --border: #e2e8f0;
-    --border-light: #f1f5f9;
-    --border-dark: #cbd5e1;
+    /* Typography - Deep Navy/Black */
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-on-primary: #FFFFFF;
 
-    /* Shadows & Glows */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --glow-primary: 0 0 0 3px rgba(6, 182, 212, 0.2);
-    --glow-teal: 0 0 20px rgba(6, 182, 212, 0.3);
+    /* Spacing & Layout - Aggressively Compact */
+    --spacing-xs: 0.125rem;
+    --spacing-sm: 0.35rem;
+    --spacing-md: 0.65rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.25rem;
 
-    /* Spacing - Reduced for compact layout */
-    --space-xs: 0.25rem;
-    --space-sm: 0.5rem;
-    --space-md: 0.75rem;
-    --space-lg: 1rem;
-    --space-xl: 1.25rem;
-    --space-2xl: 1.5rem;
-    --space-3xl: 2rem;
-
-    /* Border Radius */
-    --radius-sm: 6px;
+    /* Radius */
+    --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
-    --radius-xl: 16px;
     --radius-full: 9999px;
 
-    /* Typography */
-    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
-    --font-mono: 'Fira Code', 'Courier New', monospace;
+    /* Shadows - Lower profile */
+    --shadow-sm: 0 2px 4px -1px rgba(15, 76, 129, 0.05);
+    --shadow-md: 0 6px 12px -3px rgba(15, 76, 129, 0.08);
+    --shadow-lg: 0 12px 20px -5px rgba(15, 76, 129, 0.1);
+    --shadow-glass: 0 4px 16px 0 rgba(31, 38, 135, 0.08);
 
-    --font-h1: 2rem;
-    --font-h2: 1.5rem;
-    --font-h3: 1.25rem;
-    --font-h4: 1.125rem;
-    --font-body: 0.95rem;
-    --font-small: 0.85rem;
-    --font-tiny: 0.75rem;
+    /* Fonts - Compact Scale */
+    --font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    --font-h1: 1.75rem;
+    /* Drastically reduced */
+    --font-h2: 1.35rem;
+    --font-h3: 1.125rem;
+    --font-body: 0.875rem;
 
     /* Transitions */
-    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
-
-    /* Z-index */
-    --z-dropdown: 1000;
-    --z-sticky: 1020;
-    --z-fixed: 1030;
-    --z-modal-backdrop: 1040;
-    --z-modal: 1050;
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }

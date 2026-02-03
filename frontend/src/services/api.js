@@ -41,6 +41,19 @@ export const videoAPI = {
 
     // Delete video
     deleteVideo: (id) => api.delete(`/videos/${id}/`),
+
+    // Daily tracking endpoints
+    getVideosByDate: (params = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.start_date) queryParams.append('start_date', params.start_date);
+        if (params.end_date) queryParams.append('end_date', params.end_date);
+        if (params.days) queryParams.append('days', params.days);
+        return api.get(`/videos/by_date/?${queryParams.toString()}`);
+    },
+
+    getDailyStats: (days = 30) => api.get(`/videos/daily_stats/?days=${days}`),
+
+    getVideosForDate: (date) => api.get(`/videos/date_range/?date=${date}`),
 };
 
 export const profileAPI = {

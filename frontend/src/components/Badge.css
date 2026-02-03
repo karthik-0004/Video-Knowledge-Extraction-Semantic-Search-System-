@@ -1,36 +1,37 @@
-/* Clean Badge Component */
+/* Badge Component - Clean Minimal Style */
 .badge {
     display: inline-flex;
     align-items: center;
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--radius-full);
-    font-size: var(--font-tiny);
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    font-size: 0.6875rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    border: none;
 }
 
-.badge-success {
-    background-color: #d1fae5;
-    color: #065f46;
+.badge.primary {
+    background: #1A1A1A;
+    color: #FFFFFF;
 }
 
-.badge-warning {
-    background-color: #fef3c7;
-    color: #92400e;
+.badge.success {
+    background: #10B981;
+    color: #FFFFFF;
 }
 
-.badge-error {
-    background-color: #fee2e2;
-    color: #991b1b;
+.badge.warning {
+    background: #F59E0B;
+    color: #FFFFFF;
 }
 
-.badge-info {
-    background-color: #cffafe;
-    color: #164e63;
+.badge.error {
+    background: #EF4444;
+    color: #FFFFFF;
 }
 
-.badge-primary {
-    background-color: #cffafe;
-    color: #0e7490;
+.badge.info {
+    background: #3B82F6;
+    color: #FFFFFF;
 }

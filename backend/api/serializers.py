@@ -78,3 +78,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'total_videos', 'total_queries', 
             'total_pdfs', 'total_processing_hours'
         ]
+
+
+class DailyVideosSerializer(serializers.Serializer):
+    """Serializer for daily grouped videos"""
+    
+    date = serializers.DateField()
+    display_date = serializers.CharField(read_only=True)
+    count = serializers.IntegerField(read_only=True)
+    videos = VideoListSerializer(many=True, read_only=True)
+    
+    class Meta:
+        fields = ['date', 'display_date', 'count', 'videos']

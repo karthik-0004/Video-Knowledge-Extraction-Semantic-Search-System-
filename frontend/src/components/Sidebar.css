@@ -1,55 +1,175 @@
-/* Navy Sidebar - Clean & Professional */
+/* Sidebar - Sapphire Mist Glass Style */
 .sidebar {
-    width: 220px;
+    width: 200px;
+    /* Reduced from 220px */
     height: 100vh;
-    background-color: var(--navy);
-    border-right: 1px solid var(--navy-dark);
-    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    color: var(--text-primary);
     display: flex;
     flex-direction: column;
     position: fixed;
     left: 0;
     top: 0;
+    box-shadow: var(--shadow-sm);
+    z-index: 50;
 }
 
 .sidebar-header {
-    padding: var(--space-lg) var(--space-lg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.875rem;
+    /* Reduced padding */
+    border-bottom: 1px solid #E5E7EB;
+    text-align: center;
 }
 
 .sidebar-header h2 {
-    font-size: var(--font-h3);
+    font-size: 1rem;
+    /* Reduced font */
     margin: 0;
-    color: white;
+    color: #1A1A1A;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .sidebar-nav {
     flex: 1;
-    padding: var(--space-md);
+    padding: 0.5rem;
+    /* Reduced padding */
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: 0.2rem;
+    overflow-y: auto;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-sm);
-    color: rgba(255, 255, 255, 0.7);
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 4px;
+    color: #6B7280;
     text-decoration: none;
-    transition: all var(--transition-fast);
-    font-size: var(--font-small);
+    transition: all 0.2s ease;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.nav-item svg {
+    width: 16px;
+    height: 16px;
 }
 
 .nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    background-color: #F9FAFB;
+    color: #1A1A1A;
 }
 
 .nav-item.active {
-    background-color: var(--primary);
-    color: white;
-    box-shadow: var(--glow-teal);
+    background: #1A1A1A;
+    color: #FFFFFF;
+}
+
+/* User Profile Section */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 0.75rem;
+    border-top: 1px solid #E5E7EB;
+    background: #F9FAFB;
+}
+
+.user-profile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(4px);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #1A1A1A;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #1A1A1A;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-email {
+    font-size: 0.6875rem;
+    color: #6B7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 4px;
+    color: #1A1A1A;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: #1A1A1A;
+    color: #FFFFFF;
+    border-color: #1A1A1A;
+}
+
+.logout-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Scrollbar Styling */
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: #F9FAFB;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 10px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
 }

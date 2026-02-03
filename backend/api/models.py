@@ -78,10 +78,14 @@ class UserProfile(models.Model):
     """Extended user profile for statistics"""
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    google_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    picture = models.URLField(blank=True)
     total_videos = models.IntegerField(default=0)
     total_queries = models.IntegerField(default=0)
     total_pdfs = models.IntegerField(default=0)
     total_processing_hours = models.FloatField(default=0.0)
+    last_login = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"Profile: {self.user.username}"

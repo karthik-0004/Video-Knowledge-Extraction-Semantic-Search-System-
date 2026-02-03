@@ -5,7 +5,7 @@
 
 .main-content {
     flex: 1;
-    margin-left: 240px;
-    padding: var(--space-2xl);
-    background-color: var(--background);
+    margin-left: 220px;
+    padding: 0;
+    /* background: transparent; Let global gradient show through */
 }
