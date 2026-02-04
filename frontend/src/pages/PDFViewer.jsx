@@ -32,12 +32,54 @@ export const PDFViewer = () => {
         return `http://localhost:8000${fileUrl}`;
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         if (pdf?.file) {
-            const link = document.createElement('a');
-            link.href = getPdfUrl(pdf.file);
-            link.download = video?.title || 'document.pdf';
-            link.click();
+            try {
+                const pdfUrl = getPdfUrl(pdf.file);
+                const response = await fetch(pdfUrl);
+                const blob = await response.blob();
+                const fileName = video?.title ? `${video.title}.pdf` : 'document.pdf';
+
+                if (window.showSaveFilePicker) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: fileName,
+                            types: [{
+                                description: 'PDF Document',
+                                accept: { 'application/pdf': ['.pdf'] },
+                            }],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                    } catch (err) {
+                        // User cancelled or other error, fallback if not abort
+                        if (err.name !== 'AbortError') {
+                            console.error('File picker error:', err);
+                            // Fallback to default download
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = fileName;
+                            link.click();
+                            URL.revokeObjectURL(link.href);
+                        }
+                    }
+                } else {
+                    // Fallback for browsers without File System Access API
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = fileName;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                }
+            } catch (error) {
+                console.error('Download failed:', error);
+                // Last resort fallback using original URL
+                const link = document.createElement('a');
+                link.href = getPdfUrl(pdf.file);
+                link.download = video?.title || 'document.pdf';
+                link.click();
+            }
         }
     };
 
