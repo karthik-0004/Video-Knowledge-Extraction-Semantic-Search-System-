@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { videoAPI } from '../services/api';
 import { Button } from './Button';
-import { Send, Sparkles, X } from 'lucide-react';
+import { Eraser, Send, Sparkles, X } from 'lucide-react';
 import './AIChatPanel.css';
 
 /**
@@ -42,10 +42,46 @@ const formatMarkdown = (text) => {
 };
 
 export const AIChatPanel = ({ videoId, onClose }) => {
+    const aiChatStorageKey = `video_ai_chat_messages_${videoId}`;
     const [messages, setMessages] = useState([]);
+    const [isMessagesHydrated, setIsMessagesHydrated] = useState(false);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        setIsMessagesHydrated(false);
+        try {
+            const savedMessages = localStorage.getItem(aiChatStorageKey);
+            if (savedMessages) {
+                const parsed = JSON.parse(savedMessages);
+                if (Array.isArray(parsed)) {
+                    setMessages(parsed);
+                    setIsMessagesHydrated(true);
+                    return;
+                }
+            }
+
+            setMessages([]);
+            setIsMessagesHydrated(true);
+        } catch (error) {
+            console.error('Failed to load saved AI chat messages:', error);
+            setMessages([]);
+            setIsMessagesHydrated(true);
+        }
+    }, [aiChatStorageKey]);
+
+    useEffect(() => {
+        if (!isMessagesHydrated) {
+            return;
+        }
+
+        try {
+            localStorage.setItem(aiChatStorageKey, JSON.stringify(messages));
+        } catch (error) {
+            console.error('Failed to save AI chat messages:', error);
+        }
+    }, [messages, aiChatStorageKey, isMessagesHydrated]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,6 +120,15 @@ export const AIChatPanel = ({ videoId, onClose }) => {
         }
     };
 
+    const handleClearChat = () => {
+        if (!window.confirm('Clear AI assistant chat history?')) {
+            return;
+        }
+
+        setMessages([]);
+        localStorage.removeItem(aiChatStorageKey);
+    };
+
     return (
         <div className="ai-chat-panel">
             <div className="ai-chat-header">
@@ -91,9 +136,20 @@ export const AIChatPanel = ({ videoId, onClose }) => {
                     <Sparkles size={18} />
                     <span>AI Assistant</span>
                 </div>
-                <button className="ai-close-btn" onClick={onClose} title="Close AI panel">
-                    <X size={16} />
-                </button>
+                <div className="ai-chat-actions">
+                    <button
+                        className="ai-clear-btn"
+                        onClick={handleClearChat}
+                        title="Clear AI chat"
+                        disabled={messages.length === 0}
+                    >
+                        <Eraser size={14} />
+                        <span>Clear</span>
+                    </button>
+                    <button className="ai-close-btn" onClick={onClose} title="Close AI panel">
+                        <X size={16} />
+                    </button>
+                </div>
             </div>
 
             <div className="ai-chat-messages">

@@ -5,14 +5,16 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { AIChatPanel } from '../components/AIChatPanel';
 import { videoAPI } from '../services/api';
-import { ArrowLeft, Send, Sparkles } from 'lucide-react';
+import { ArrowLeft, Eraser, FileText, Send, Sparkles } from 'lucide-react';
 import './Chat.css';
 
 export const Chat = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const chatStorageKey = `video_chat_messages_${id}`;
     const [video, setVideo] = useState(null);
     const [messages, setMessages] = useState([]);
+    const [isMessagesHydrated, setIsMessagesHydrated] = useState(false);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [showAI, setShowAI] = useState(false);
@@ -25,6 +27,40 @@ export const Chat = () => {
     }, [id]);
 
     useEffect(() => {
+        setIsMessagesHydrated(false);
+        try {
+            const savedMessages = localStorage.getItem(chatStorageKey);
+            if (savedMessages) {
+                const parsed = JSON.parse(savedMessages);
+                if (Array.isArray(parsed)) {
+                    setMessages(parsed);
+                    setIsMessagesHydrated(true);
+                    return;
+                }
+            }
+
+            setMessages([]);
+            setIsMessagesHydrated(true);
+        } catch (error) {
+            console.error('Failed to load saved chat messages:', error);
+            setMessages([]);
+            setIsMessagesHydrated(true);
+        }
+    }, [chatStorageKey]);
+
+    useEffect(() => {
+        if (!isMessagesHydrated) {
+            return;
+        }
+
+        try {
+            localStorage.setItem(chatStorageKey, JSON.stringify(messages));
+        } catch (error) {
+            console.error('Failed to save chat messages:', error);
+        }
+    }, [messages, chatStorageKey, isMessagesHydrated]);
+
+    useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
@@ -32,6 +68,29 @@ export const Chat = () => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const getPdfUrl = (fileUrl) => {
+        if (!fileUrl) return '';
+        if (fileUrl.startsWith('http')) return fileUrl;
+        return `http://localhost:8000${fileUrl}`;
+    };
+
+    const handleOpenPdf = async () => {
+        try {
+            const pdfRes = await videoAPI.getPDF(id);
+            const fileUrl = pdfRes?.data?.file;
+
+            if (!fileUrl) {
+                alert('PDF is not available yet for this video.');
+                return;
+            }
+
+            window.open(getPdfUrl(fileUrl), '_blank', 'noopener,noreferrer');
+        } catch (error) {
+            console.error('Failed to open PDF:', error);
+            alert('Could not open PDF right now. Please try again.');
+        }
     };
 
     const handleSend = async () => {
@@ -61,6 +120,15 @@ export const Chat = () => {
         }
     };
 
+    const handleClearChat = () => {
+        if (!window.confirm('Clear this chat history?')) {
+            return;
+        }
+
+        setMessages([]);
+        localStorage.removeItem(chatStorageKey);
+    };
+
     return (
         <AppLayout>
             <div className={`chat-page ${showAI ? 'chat-split' : ''}`}>
@@ -70,6 +138,22 @@ export const Chat = () => {
                         Back
                     </Button>
                     <h2>{video?.title || 'Loading...'}</h2>
+                    <Button
+                        variant="secondary"
+                        onClick={handleOpenPdf}
+                        disabled={!video}
+                    >
+                        <FileText size={18} />
+                        PDF
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        onClick={handleClearChat}
+                        disabled={messages.length === 0}
+                    >
+                        <Eraser size={18} />
+                        Clear Chat
+                    </Button>
                     <Button
                         variant={showAI ? 'primary' : 'secondary'}
                         onClick={() => setShowAI(!showAI)}

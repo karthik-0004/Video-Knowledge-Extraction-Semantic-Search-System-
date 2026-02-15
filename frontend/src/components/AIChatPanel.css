@@ -35,6 +35,39 @@
     flex-shrink: 0;
 }
 
+.ai-chat-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.ai-clear-btn {
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.ai-clear-btn:hover:not(:disabled) {
+    background: var(--surface-hover);
+    border-color: var(--border-active);
+    color: var(--text-primary);
+}
+
+.ai-clear-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .ai-close-btn {
     width: 28px;
     height: 28px;

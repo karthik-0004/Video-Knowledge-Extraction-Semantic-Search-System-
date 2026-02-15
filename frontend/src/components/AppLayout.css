@@ -12,7 +12,8 @@
     padding: var(--space-4) var(--space-5);
     min-height: 100vh;
     max-height: 100vh;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 @media (max-width: 768px) {
