@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Upload, User, LogOut, History } from 'lucide-react';
+import { Home, Upload, User, LogOut, History, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 export const Sidebar = () => {
     const { user, logout } = useAuth();
+    const [isDark, setIsDark] = useState(() => {
+        return localStorage.getItem('theme') === 'dark';
+    });
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }, [isDark]);
 
     const navItems = [
         { path: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -24,6 +32,13 @@ export const Sidebar = () => {
         <div className="sidebar">
             <div className="sidebar-header">
                 <h2>🎥 VideoMind</h2>
+                <button
+                    className="theme-toggle"
+                    onClick={() => setIsDark(!isDark)}
+                    title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                    {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                </button>
             </div>
 
             <nav className="sidebar-nav">

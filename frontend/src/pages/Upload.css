@@ -1,66 +1,75 @@
+/* ═══════════════════════════════════════════════════════════════
+   Upload Page
+   ═══════════════════════════════════════════════════════════════ */
+.upload-page {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+}
+
 .upload-page h1 {
-    margin-bottom: var(--space-2xl);
-    background: linear-gradient(135deg, var(--primary) 0%, #2563EB 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 2.5rem;
+    margin-bottom: var(--space-6);
+    font-size: var(--font-h1);
+    font-weight: 700;
+    color: var(--text-primary);
     letter-spacing: -0.02em;
 }
 
+/* ── Dropzone ── */
 .dropzone {
-    border: 1px dashed var(--primary);
+    border: 2px dashed var(--border);
     border-radius: var(--radius-lg);
-    padding: var(--space-3xl);
+    padding: var(--space-16) var(--space-8);
     text-align: center;
     cursor: pointer;
-    transition: all var(--transition-smooth);
-    background-color: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(8px);
-    margin-bottom: var(--space-2xl);
-    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    background: var(--surface);
+    margin-bottom: var(--space-8);
 }
 
 .dropzone:hover,
 .dropzone.active {
     border-color: var(--primary);
-    background-color: rgba(255, 255, 255, 0.7);
+    background: var(--primary-light);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
+.dropzone svg {
+    color: var(--primary) !important;
+    opacity: 0.7;
+}
+
 .dropzone-text {
-    margin: var(--space-lg) 0 var(--space-sm);
+    margin: var(--space-4) 0 var(--space-2);
     font-size: var(--font-h3);
-    color: var(--primary);
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .dropzone-hint {
-    color: var(--text-secondary);
-    font-size: var(--font-small);
+    color: var(--text-tertiary);
+    font-size: var(--font-sm);
 }
 
+/* ── Upload Queue ── */
 .upload-queue h2 {
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-4);
     font-weight: 500;
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: var(--font-sm);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
 }
 
 .upload-item {
-    margin-bottom: var(--space-lg);
-    background: rgba(255, 255, 255, 0.6) !important;
-    /* Force glass on items */
+    margin-bottom: var(--space-4);
 }
 
 .upload-item-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--space-lg);
+    gap: var(--space-4);
 }
 
 .upload-info {
@@ -69,41 +78,48 @@
 
 .upload-filename {
     font-weight: 600;
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-2);
     color: var(--text-primary);
+    font-size: var(--font-sm);
 }
 
+/* ── Progress Bar ── */
 .progress-bar {
-    height: 6px;
-    background-color: rgba(15, 76, 129, 0.1);
+    height: 4px;
+    background: var(--bg-tertiary);
     border-radius: var(--radius-full);
     overflow: hidden;
-    margin: var(--space-sm) 0;
+    margin: var(--space-2) 0;
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary) 0%, #3B82F6 100%);
-    transition: width 0.3s ease;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    transition: width var(--transition-smooth);
     border-radius: var(--radius-full);
 }
 
 .upload-status {
-    margin-top: var(--space-sm);
+    margin-top: var(--space-2);
 }
 
+/* ── Remove Button ── */
 .remove-btn {
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid transparent;
+    background: var(--surface);
+    border: 1px solid var(--border);
     cursor: pointer;
-    padding: var(--space-sm);
-    color: var(--error);
-    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .remove-btn:hover {
-    background-color: #FEF2F2;
-    border-color: #FECACA;
+    background: var(--error-light);
+    border-color: var(--error);
+    color: var(--error);
     transform: scale(1.05);
 }

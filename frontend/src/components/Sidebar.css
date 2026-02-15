@@ -1,106 +1,134 @@
-/* Sidebar - Sapphire Mist Glass Style */
+/* ═══════════════════════════════════════════════════════════════
+   Sidebar — Clean vertical navigation
+   ═══════════════════════════════════════════════════════════════ */
 .sidebar {
-    width: 200px;
-    /* Reduced from 220px */
+    width: var(--sidebar-width);
     height: 100vh;
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
     color: var(--text-primary);
     display: flex;
     flex-direction: column;
     position: fixed;
     left: 0;
     top: 0;
-    box-shadow: var(--shadow-sm);
     z-index: 50;
+    transition: background var(--transition-smooth), border-color var(--transition-smooth);
 }
 
+/* ── Header ── */
 .sidebar-header {
-    padding: 0.875rem;
-    /* Reduced padding */
-    border-bottom: 1px solid #E5E7EB;
-    text-align: center;
+    padding: var(--space-5) var(--space-5);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--header-height);
 }
 
 .sidebar-header h2 {
-    font-size: 1rem;
-    /* Reduced font */
+    font-size: var(--font-body);
     margin: 0;
-    color: #1A1A1A;
+    color: var(--text-primary);
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: -0.01em;
 }
 
+/* ── Theme Toggle ── */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary-muted);
+}
+
+/* ── Navigation ── */
 .sidebar-nav {
     flex: 1;
-    padding: 0.5rem;
-    /* Reduced padding */
+    padding: var(--space-3);
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: var(--space-1);
     overflow-y: auto;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.625rem 0.75rem;
-    border-radius: 4px;
-    color: #6B7280;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
     text-decoration: none;
-    transition: all 0.2s ease;
-    font-size: 0.8125rem;
+    transition: all var(--transition-fast);
+    font-size: var(--font-sm);
     font-weight: 500;
+    position: relative;
 }
 
 .nav-item svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 .nav-item:hover {
-    background-color: #F9FAFB;
-    color: #1A1A1A;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .nav-item.active {
-    background: #1A1A1A;
-    color: #FFFFFF;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
 }
 
-/* User Profile Section */
+[data-theme="dark"] .nav-item.active {
+    background: var(--primary-subtle);
+}
+
+/* ── Footer ── */
 .sidebar-footer {
     margin-top: auto;
-    padding: 0.75rem;
-    border-top: 1px solid #E5E7EB;
-    background: #F9FAFB;
+    padding: var(--space-4);
+    border-top: 1px solid var(--border);
 }
 
 .user-profile-section {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-3);
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    backdrop-filter: blur(4px);
 }
 
 .user-avatar {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    border: 2px solid #1A1A1A;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--border);
     object-fit: cover;
 }
 
@@ -112,9 +140,9 @@
 }
 
 .user-name {
-    font-size: 0.75rem;
+    font-size: var(--font-xs);
     font-weight: 600;
-    color: #1A1A1A;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -122,7 +150,7 @@
 
 .user-email {
     font-size: 0.6875rem;
-    color: #6B7280;
+    color: var(--text-tertiary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -133,22 +161,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.75rem;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 4px;
-    color: #1A1A1A;
-    font-size: 0.75rem;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: var(--font-xs);
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
 }
 
 .logout-btn:hover {
-    background: #1A1A1A;
-    color: #FFFFFF;
-    border-color: #1A1A1A;
+    background: var(--error-light);
+    color: var(--error);
+    border-color: var(--error);
 }
 
 .logout-btn svg {
@@ -156,20 +184,20 @@
     height: 14px;
 }
 
-/* Scrollbar Styling */
+/* ── Sidebar Scrollbar ── */
 .sidebar-nav::-webkit-scrollbar {
     width: 4px;
 }
 
 .sidebar-nav::-webkit-scrollbar-track {
-    background: #F9FAFB;
+    background: transparent;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-    background: #D1D5DB;
-    border-radius: 10px;
+    background: var(--border);
+    border-radius: var(--radius-full);
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: #9CA3AF;
+    background: var(--text-tertiary);
 }

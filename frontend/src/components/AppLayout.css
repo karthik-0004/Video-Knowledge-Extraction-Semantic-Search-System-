@@ -1,11 +1,23 @@
+/* App Layout */
 .app-layout {
     display: flex;
     min-height: 100vh;
+    background: var(--bg-primary);
+    transition: background var(--transition-smooth);
 }
 
 .main-content {
     flex: 1;
-    margin-left: 220px;
-    padding: 0;
-    /* background: transparent; Let global gradient show through */
+    margin-left: var(--sidebar-width);
+    padding: var(--space-4) var(--space-5);
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: var(--space-4);
+    }
 }

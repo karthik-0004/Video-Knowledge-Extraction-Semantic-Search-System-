@@ -1,26 +1,27 @@
+/* ═══════════════════════════════════════════════════════════════
+   History Page
+   ═══════════════════════════════════════════════════════════════ */
 .history-page {
-    max-width: 1200px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: 1rem 1.5rem;
 }
 
 .history-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1.25rem;
-    gap: 0.75rem;
+    margin-bottom: var(--space-5);
+    gap: var(--space-4);
 }
 
 .header-title {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
 }
 
 .header-title svg {
     color: var(--primary);
-    /* Dark Blue */
     flex-shrink: 0;
     width: 28px;
     height: 28px;
@@ -28,59 +29,60 @@
 
 .header-title h1 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: var(--font-h1);
     font-weight: 700;
-    color: var(--primary);
-    /* Dark Blue */
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
 .header-subtitle {
-    margin: 0.25rem 0 0 0;
-    font-size: 0.75rem;
-    color: #6B7280;
+    margin: var(--space-1) 0 0 0;
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
 }
 
+/* ── Summary Bar ── */
 .history-summary {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    background: #FFFFFF;
-    border-radius: 6px;
-    border: 1px solid #E5E7EB;
-    border-left: 3px solid #1A1A1A;
+    margin-bottom: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
 }
 
 .history-summary p {
     margin: 0;
-    color: var(--primary);
-    /* Dark Blue */
-    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
 }
 
 .history-summary strong {
-    color: var(--primary);
-    /* Dark Blue */
+    color: var(--text-primary);
     font-weight: 600;
 }
 
+/* ── Daily Buckets Container ── */
 .daily-buckets-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--space-6);
 }
 
+/* ── Loading / Empty States ── */
 .loading-state,
 .empty-state {
     text-align: center;
-    padding: 3rem 1.5rem;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    margin-top: 1.5rem;
+    padding: var(--space-16) var(--space-6);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-top: var(--space-5);
 }
 
 .loading-state p {
-    color: #6B7280;
-    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    font-size: var(--font-sm);
     margin: 0;
 }
 
@@ -88,30 +90,30 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
 }
 
 .empty-icon {
-    color: #D1D5DB;
-    opacity: 0.5;
-    margin-bottom: 0.5rem;
+    color: var(--border);
+    opacity: 0.6;
+    margin-bottom: var(--space-2);
     width: 48px;
     height: 48px;
 }
 
 .empty-state h2 {
     margin: 0;
-    font-size: 1.125rem;
-    color: var(--primary);
-    /* Dark Blue */
+    font-size: var(--font-h3);
+    color: var(--text-primary);
 }
 
 .empty-state p {
     margin: 0;
-    color: #6B7280;
-    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
 }
 
+/* ── Spinning animation ── */
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -126,19 +128,15 @@
     animation: spin 1s linear infinite;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
-    .history-page {
-        padding: 0.75rem;
-    }
-
     .history-header {
         flex-direction: column;
         align-items: flex-start;
     }
 
     .header-title h1 {
-        font-size: 1.25rem;
+        font-size: var(--font-h3);
     }
 
     .header-title {

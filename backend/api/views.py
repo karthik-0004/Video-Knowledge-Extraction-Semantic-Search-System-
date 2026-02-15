@@ -5,6 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -326,6 +327,101 @@ class VideoViewSet(viewsets.ModelViewSet):
                     {'error': str(e)},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
+
+
+    @action(detail=True, methods=['post'])
+    def ai_chat(self, request, pk=None):
+        """AI chatbot powered by Groq — answers questions about a video's content"""
+        video = self.get_object()
+
+        if video.status != 'completed':
+            return Response(
+                {'error': 'Video processing not complete'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        message = request.data.get('message')
+        history = request.data.get('history', [])
+
+        if not message:
+            return Response(
+                {'error': 'Message is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Load transcript for this video
+            from pathlib import Path as PPath
+            import json as json_mod
+            SCRIPTS_DIR = PPath(settings.BASE_DIR).parent / 'Video-Knowledge-Extraction-Semantic-Search-System-RAG-based-'
+
+            import sys
+            sys.path.insert(0, str(SCRIPTS_DIR))
+            import pipelIne_api
+
+            video_filename = PPath(video.file.name).name
+            base_name = pipelIne_api.clean_filename(video_filename.rsplit('.', 1)[0])
+            json_path = SCRIPTS_DIR / 'jsons' / f'0_{base_name}.mp3.json'
+
+            transcript_text = ""
+            if json_path.exists():
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data = json_mod.load(f)
+                    transcript_text = data.get('text', '')
+            else:
+                logger.warning(f"Transcript not found at {json_path}")
+                transcript_text = "No transcript available for this video."
+
+            # Truncate transcript if too long (Groq context limit)
+            max_chars = 12000
+            if len(transcript_text) > max_chars:
+                transcript_text = transcript_text[:max_chars] + "... [transcript truncated]"
+
+            # Build messages for Groq
+            system_prompt = (
+                f"You are a helpful AI assistant. You have access to the transcript of a video titled \"{video.title}\". "
+                f"You can answer ANY question the user asks — whether it's about the video or any other topic. "
+                f"When the question is about the video, use the transcript below as context. "
+                f"For other questions, answer using your general knowledge. Be helpful, concise, and friendly.\n\n"
+                f"VIDEO TRANSCRIPT (for reference):\n{transcript_text}"
+            )
+
+            groq_messages = [{"role": "system", "content": system_prompt}]
+
+            # Add conversation history
+            for h in history[-10:]:  # Last 10 messages to stay within context
+                groq_messages.append({
+                    "role": h.get("role", "user"),
+                    "content": h.get("content", "")
+                })
+
+            # Add current message
+            groq_messages.append({"role": "user", "content": message})
+
+            # Call Groq chat completions
+            from groq import Groq
+            groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=groq_messages,
+                temperature=0.7,
+                max_tokens=1024,
+            )
+
+            reply = completion.choices[0].message.content
+
+            return Response({
+                'reply': reply,
+                'model': 'llama-3.3-70b-versatile',
+            })
+
+        except Exception as e:
+            logger.error(f"AI chat error: {e}", exc_info=True)
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class QueryViewSet(viewsets.ReadOnlyModelViewSet):

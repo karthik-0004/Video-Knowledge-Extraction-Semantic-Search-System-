@@ -54,6 +54,10 @@ export const videoAPI = {
     getDailyStats: (days = 30) => api.get(`/videos/daily_stats/?days=${days}`),
 
     getVideosForDate: (date) => api.get(`/videos/date_range/?date=${date}`),
+
+    // AI Chat — Groq-powered chatbot about video content
+    aiChat: (id, message, history = []) =>
+        api.post(`/videos/${id}/ai_chat/`, { message, history }),
 };
 
 export const profileAPI = {

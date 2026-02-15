@@ -1,79 +1,81 @@
+/* ═══════════════════════════════════════════════════════════════
+   Dashboard — Stats and recent videos
+   ═══════════════════════════════════════════════════════════════ */
 .dashboard {
-    padding: 0.75rem 1rem;
-    max-width: 1400px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
 }
 
 .dashboard h1 {
-    margin-bottom: 1rem;
-    color: var(--primary);
-    font-size: 1.5rem;
+    margin-bottom: var(--space-6);
+    color: var(--text-primary);
+    font-size: var(--font-h1);
     font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
+/* ── Stats Grid ── */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-5);
+    margin-bottom: var(--space-8);
 }
 
 .stat-card {
     text-align: center;
-    padding: 1.5rem;
-    transition: all 0.2s ease;
-    /* Background handled by glass-card class */
+    padding: var(--space-6) var(--space-5) !important;
+    transition: all var(--transition-base);
 }
 
-/* ... existing styles ... */
-
 .stat-card:hover {
-    border-color: var(--primary);
+    border-color: var(--border-hover);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .stat-card svg {
-    margin-bottom: 0.25rem;
-    width: 24px;
-    height: 24px;
+    margin-bottom: var(--space-2);
+    width: 28px;
+    height: 28px;
+    color: var(--primary) !important;
 }
 
 .stat-value {
-    font-size: 1.5rem;
-    /* Reduced scale target */
+    font-size: var(--font-h1);
     font-weight: 700;
-    color: var(--primary);
-    /* Changed to Dark Blue */
-    margin-bottom: 0.125rem;
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+    line-height: 1.2;
 }
 
 .stat-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
     font-weight: 600;
 }
 
+/* ── Recent Section ── */
 .recent-section h2 {
-    margin-bottom: 0.75rem;
-    color: var(--primary);
-    /* Changed to Dark Blue */
-    font-size: 1.125rem;
+    margin-bottom: var(--space-4);
+    color: var(--text-primary);
+    font-size: var(--font-h3);
     font-weight: 600;
 }
 
 .videos-list {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--space-3);
 }
 
 .video-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem;
+    padding: var(--space-4) !important;
 }
 
 .video-info {
@@ -81,42 +83,38 @@
 }
 
 .video-info h3 {
-    margin: 0 0 0.375rem 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--primary);
-    /* Changed to Dark Blue */
+    margin: 0 0 var(--space-2) 0;
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 .video-meta {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--space-3);
     align-items: center;
 }
 
 .video-meta span {
-    font-size: 0.75rem;
-    color: #6B7280;
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
 }
 
 .video-actions {
     display: flex;
-    gap: 0.375rem;
+    gap: var(--space-2);
 }
 
+/* Responsive */
 @media (max-width: 768px) {
-    .dashboard {
-        padding: 0.75rem;
-    }
-
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .video-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.75rem;
+        gap: var(--space-3);
     }
 
     .video-actions {

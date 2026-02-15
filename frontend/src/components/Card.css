@@ -1,31 +1,36 @@
-/* Clean Card Component - Minimal Style */
+/* ═══════════════════════════════════════════════════════════════
+   Card — Elevated surface component
+   ═══════════════════════════════════════════════════════════════ */
 .card {
-    background: var(--card-bg);
-    border-radius: 4px;
-    padding: 1rem;
-    box-shadow: none;
-    transition: all 0.2s ease;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-base);
     border: 1px solid var(--border);
 }
 
-.card.hover {
+.card-hover {
     cursor: pointer;
 }
 
-.card.hover:hover {
-    border-color: #1A1A1A;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+.card-hover:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
+/* Flat variant */
 .card.flat {
     box-shadow: none;
 }
 
-/* Card variants */
+/* Primary surface */
 .card.primary {
-    background: var(--surface);
+    background: var(--surface-raised);
 }
 
+/* Accented left border */
 .card.accent {
     border-left: 3px solid var(--primary);
 }

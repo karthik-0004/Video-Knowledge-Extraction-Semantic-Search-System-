@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/AppLayout';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { AIChatPanel } from '../components/AIChatPanel';
 import { videoAPI } from '../services/api';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles } from 'lucide-react';
 import './Chat.css';
 
 export const Chat = () => {
@@ -14,6 +15,7 @@ export const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showAI, setShowAI] = useState(false);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -61,63 +63,87 @@ export const Chat = () => {
 
     return (
         <AppLayout>
-            <div className="chat-page">
+            <div className={`chat-page ${showAI ? 'chat-split' : ''}`}>
                 <div className="chat-header">
                     <Button variant="secondary" onClick={() => navigate('/dashboard')}>
                         <ArrowLeft size={20} />
                         Back
                     </Button>
                     <h2>{video?.title || 'Loading...'}</h2>
+                    <Button
+                        variant={showAI ? 'primary' : 'secondary'}
+                        onClick={() => setShowAI(!showAI)}
+                    >
+                        <Sparkles size={18} />
+                        {showAI ? 'Close AI' : 'AI Help'}
+                    </Button>
                 </div>
 
-                <Card className="chat-container">
-                    <div className="messages">
-                        {messages.length === 0 && (
-                            <div className="empty-state">
-                                Ask any question about this video!
-                            </div>
-                        )}
-
-                        {messages.map((msg, idx) => (
-                            <div key={idx} className={`message ${msg.role}`}>
-                                <div className="message-content">
-                                    {msg.content}
-                                    {msg.timestamp_start && (
-                                        <div className="timestamp">
-                                            🕐 {formatTime(msg.timestamp_start)} - {formatTime(msg.timestamp_end)}
-                                        </div>
-                                    )}
+                <div className="chat-body">
+                    {/* Left Panel — Existing video Q&A */}
+                    <Card className="chat-container chat-left-panel">
+                        <div className="messages">
+                            {messages.length === 0 && (
+                                <div className="empty-state">
+                                    Ask any question about this video!
                                 </div>
-                            </div>
-                        ))}
+                            )}
 
-                        {loading && (
-                            <div className="message assistant">
-                                <div className="message-content">
-                                    <div className="typing-indicator">
-                                        <span></span><span></span><span></span>
+                            {messages.map((msg, idx) => (
+                                <div key={idx} className={`message ${msg.role}`}>
+                                    <div className="message-content">
+                                        {msg.content}
+                                        {msg.timestamp_start && (
+                                            <div className="ts-neon">
+                                                <div className="ts-ring">
+                                                    <span className="ts-emoji">🕰️</span>
+                                                </div>
+                                                <div className="ts-content">
+                                                    <span className="ts-label">Timestamp</span>
+                                                    <span className="ts-time">{formatTime(msg.timestamp_start)} – {formatTime(msg.timestamp_end)}</span>
+                                                    <span className="ts-video">{video?.title}</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            ))}
 
-                        <div ref={messagesEndRef} />
-                    </div>
+                            {loading && (
+                                <div className="message assistant">
+                                    <div className="message-content">
+                                        <div className="typing-indicator">
+                                            <span></span><span></span><span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                    <div className="chat-input">
-                        <input
-                            type="text"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder="Ask a question..."
-                            disabled={loading}
-                        />
-                        <Button onClick={handleSend} disabled={loading || !input.trim()}>
-                            <Send size={20} />
-                        </Button>
-                    </div>
-                </Card>
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        <div className="chat-input">
+                            <input
+                                type="text"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                placeholder="Ask a question..."
+                                disabled={loading}
+                            />
+                            <Button onClick={handleSend} disabled={loading || !input.trim()}>
+                                <Send size={20} />
+                            </Button>
+                        </div>
+                    </Card>
+
+                    {/* Right Panel — AI Chatbot */}
+                    {showAI && (
+                        <div className="chat-right-panel">
+                            <AIChatPanel videoId={id} onClose={() => setShowAI(false)} />
+                        </div>
+                    )}
+                </div>
             </div>
         </AppLayout>
     );
