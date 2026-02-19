@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.core.files import File
 from .models import Video, Query, PDF, UserProfile
 from .serializers import (
     VideoSerializer, VideoListSerializer, QuerySerializer,
@@ -17,12 +18,20 @@ from .serializers import (
 )
 import os
 import logging
+import shutil
+import tempfile
+import threading
+import uuid
+import re
 from datetime import datetime, timedelta
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from collections import OrderedDict
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
+YOUTUBE_DOWNLOAD_TASKS = {}
+YOUTUBE_DOWNLOAD_LOCK = threading.Lock()
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -40,6 +49,159 @@ class VideoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # TODO: Filter by user when auth is implemented
         return Video.objects.all()
+
+    def _validate_video_file(self, file_name, file_size):
+        """Validate uploaded/downloaded video metadata"""
+        max_size = 500 * 1024 * 1024  # 500MB
+        if file_size > max_size:
+            raise ValueError(f"File too large. Max size is {max_size / (1024*1024):.0f}MB")
+
+        allowed_extensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm']
+        file_ext = os.path.splitext(file_name)[1].lower()
+        if file_ext not in allowed_extensions:
+            raise ValueError(f"Invalid file type. Allowed: {', '.join(allowed_extensions)}")
+
+    def _get_or_create_default_user(self):
+        """Get fallback demo user until auth is fully implemented"""
+        user, _ = User.objects.get_or_create(
+            username='demo_user',
+            defaults={'email': 'demo@example.com'}
+        )
+        return user
+
+    def _is_youtube_url(self, value):
+        """Check if URL is from YouTube"""
+        try:
+            parsed = urlparse(value)
+            host = (parsed.netloc or '').lower()
+            return any(domain in host for domain in ['youtube.com', 'youtu.be'])
+        except Exception:
+            return False
+
+    def _update_youtube_task(self, task_id, **updates):
+        """Thread-safe update for YouTube download task state"""
+        with YOUTUBE_DOWNLOAD_LOCK:
+            if task_id in YOUTUBE_DOWNLOAD_TASKS:
+                YOUTUBE_DOWNLOAD_TASKS[task_id].update(updates)
+
+    def _parse_progress_percent(self, value):
+        """Convert yt-dlp progress value to integer percent"""
+        if value is None:
+            return None
+
+        if isinstance(value, (int, float)):
+            return max(0, min(100, int(float(value))))
+
+        text = str(value)
+        match = re.search(r"(\d+(?:\.\d+)?)%", text)
+        if not match:
+            return None
+
+        return max(0, min(100, int(float(match.group(1)))))
+
+    def _run_youtube_download_task(self, task_id, youtube_url, custom_title):
+        """Background task that downloads YouTube video and triggers processing"""
+        temp_dir = None
+        downloaded_path = None
+
+        try:
+            import yt_dlp
+
+            temp_dir = tempfile.mkdtemp(prefix='yt_download_')
+            info_ref = {}
+
+            def progress_hook(progress_data):
+                status_value = progress_data.get('status')
+
+                if status_value == 'downloading':
+                    percent_value = self._parse_progress_percent(progress_data.get('_percent_str'))
+                    if percent_value is None:
+                        total_bytes = progress_data.get('total_bytes') or progress_data.get('total_bytes_estimate')
+                        downloaded_bytes = progress_data.get('downloaded_bytes')
+                        if total_bytes and downloaded_bytes is not None:
+                            percent_value = int((downloaded_bytes / total_bytes) * 100)
+
+                    self._update_youtube_task(
+                        task_id,
+                        status='downloading',
+                        message='Downloading from YouTube...',
+                        progress=percent_value if percent_value is not None else 0,
+                    )
+
+                if status_value == 'finished':
+                    filename = progress_data.get('filename')
+                    if filename:
+                        info_ref['downloaded_path'] = filename
+
+                    self._update_youtube_task(
+                        task_id,
+                        status='downloaded',
+                        message='Download complete. Uploading to application...',
+                        progress=100,
+                    )
+
+            ydl_opts = {
+                'format': 'best[ext=mp4]/best',
+                'outtmpl': os.path.join(temp_dir, '%(title).200B [%(id)s].%(ext)s'),
+                'noplaylist': True,
+                'quiet': True,
+                'no_warnings': True,
+                'progress_hooks': [progress_hook],
+            }
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(youtube_url, download=True)
+                downloaded_path = info_ref.get('downloaded_path') or ydl.prepare_filename(info)
+
+            if not downloaded_path or not os.path.exists(downloaded_path):
+                downloaded_files = [
+                    os.path.join(temp_dir, name)
+                    for name in os.listdir(temp_dir)
+                    if os.path.isfile(os.path.join(temp_dir, name))
+                ]
+                if not downloaded_files:
+                    raise ValueError('Failed to download video from YouTube')
+                downloaded_path = downloaded_files[0]
+
+            file_name = os.path.basename(downloaded_path)
+            file_size = os.path.getsize(downloaded_path)
+            self._validate_video_file(file_name, file_size)
+
+            user = self._get_or_create_default_user()
+            final_title = custom_title or info.get('title') or os.path.splitext(file_name)[0]
+
+            video = Video(user=user, title=final_title, status='uploading')
+            with open(downloaded_path, 'rb') as downloaded_file:
+                video.file.save(file_name, File(downloaded_file), save=False)
+            video.save()
+
+            from video_processor.pipeline import process_video_async
+            process_video_async(video.id)
+
+            self._update_youtube_task(
+                task_id,
+                status='processing',
+                message='Uploaded. Processing video...',
+                progress=100,
+                video_id=video.id,
+                title=video.title,
+            )
+
+            logger.info(f"YouTube download task {task_id} created video ID: {video.id}")
+
+        except ValueError as e:
+            logger.error(f"YouTube upload validation error in task {task_id}: {e}")
+            self._update_youtube_task(task_id, status='failed', message=str(e), progress=0, error=str(e))
+        except ImportError:
+            logger.error("yt-dlp is not installed")
+            error_message = 'YouTube downloader dependency is missing on server'
+            self._update_youtube_task(task_id, status='failed', message=error_message, progress=0, error=error_message)
+        except Exception as e:
+            logger.error(f"Error during YouTube upload task {task_id}: {e}", exc_info=True)
+            self._update_youtube_task(task_id, status='failed', message=str(e), progress=0, error=str(e))
+        finally:
+            if temp_dir and os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir, ignore_errors=True)
     
     def perform_create(self, serializer):
         """Handle video upload with proper error handling and logging"""
@@ -50,25 +212,13 @@ class VideoViewSet(viewsets.ModelViewSet):
             
             uploaded_file = self.request.data['file']
             
-            # Check file size (max 500MB)
-            max_size = 500 * 1024 * 1024  # 500MB
-            if uploaded_file.size > max_size:
-                raise ValueError(f"File too large. Max size is {max_size / (1024*1024):.0f}MB")
-            
-            # Check file type
-            allowed_extensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm']
-            file_ext = os.path.splitext(uploaded_file.name)[1].lower()
-            if file_ext not in allowed_extensions:
-                raise ValueError(f"Invalid file type. Allowed: {', '.join(allowed_extensions)}")
+            self._validate_video_file(uploaded_file.name, uploaded_file.size)
             
             logger.info(f"Uploading video: {uploaded_file.name}, size: {uploaded_file.size} bytes")
             
             # TODO: Set user from request.user when auth is implemented
             # For now, create or get a default user
-            user, _ = User.objects.get_or_create(
-                username='demo_user',
-                defaults={'email': 'demo@example.com'}
-            )
+            user = self._get_or_create_default_user()
             
             video = serializer.save(user=user, status='uploading')
             logger.info(f"Video created with ID: {video.id}, file path: {video.file.path}")
@@ -84,6 +234,63 @@ class VideoViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error during video upload: {e}", exc_info=True)
             raise
+
+    @action(detail=False, methods=['post'])
+    def upload_youtube(self, request):
+        """Start YouTube download and return a task ID for progress polling"""
+        youtube_url = (request.data.get('youtube_url') or '').strip()
+        custom_title = (request.data.get('title') or '').strip()
+
+        if not youtube_url:
+            return Response({'error': 'youtube_url is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not self._is_youtube_url(youtube_url):
+            return Response({'error': 'Only YouTube links are supported'}, status=status.HTTP_400_BAD_REQUEST)
+
+        task_id = str(uuid.uuid4())
+        with YOUTUBE_DOWNLOAD_LOCK:
+            YOUTUBE_DOWNLOAD_TASKS[task_id] = {
+                'task_id': task_id,
+                'status': 'queued',
+                'message': 'Queued for download...',
+                'progress': 0,
+                'video_id': None,
+                'title': custom_title or '',
+                'error': None,
+                'created_at': datetime.now().isoformat(),
+            }
+
+        thread = threading.Thread(
+            target=self._run_youtube_download_task,
+            args=(task_id, youtube_url, custom_title),
+            daemon=True,
+        )
+        thread.start()
+
+        return Response(
+            {
+                'task_id': task_id,
+                'status': 'queued',
+                'message': 'Queued for download...',
+                'progress': 0,
+            },
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(detail=False, methods=['get'])
+    def youtube_status(self, request):
+        """Get YouTube download task progress and resulting video id"""
+        task_id = (request.query_params.get('task_id') or '').strip()
+        if not task_id:
+            return Response({'error': 'task_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with YOUTUBE_DOWNLOAD_LOCK:
+            task = YOUTUBE_DOWNLOAD_TASKS.get(task_id)
+
+        if not task:
+            return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(task)
     
     @action(detail=False, methods=['get'])
     def by_date(self, request):
@@ -312,21 +519,26 @@ class VideoViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        refresh = str(request.query_params.get('refresh', '')).lower() in ['1', 'true', 'yes']
+
         # Check if PDF exists
         try:
             pdf = video.pdf
-            return Response(PDFSerializer(pdf).data)
-        except PDF.DoesNotExist:
-            # Generate PDF
-            from video_processor.pdf_gen import generate_pdf
-            try:
-                pdf = generate_pdf(video.id)
+            if not refresh:
                 return Response(PDFSerializer(pdf).data)
-            except Exception as e:
-                return Response(
-                    {'error': str(e)},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+        except PDF.DoesNotExist:
+            pass
+
+        # Generate or regenerate PDF
+        from video_processor.pdf_gen import generate_pdf
+        try:
+            pdf = generate_pdf(video.id)
+            return Response(PDFSerializer(pdf).data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
     @action(detail=True, methods=['post'])

@@ -14,12 +14,33 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const normalizeUser = (rawUser) => {
+        if (!rawUser) return null;
+
+        const picture =
+            rawUser.picture ||
+            rawUser.avatar ||
+            rawUser.avatarUrl ||
+            rawUser.imageUrl ||
+            '';
+
+        return {
+            name: rawUser.name || rawUser.fullName || rawUser.email || 'User',
+            email: rawUser.email || '',
+            picture,
+            googleId: rawUser.googleId || rawUser.sub || '',
+        };
+    };
+
     useEffect(() => {
         // Check if user is logged in (from localStorage)
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
             try {
-                setUser(JSON.parse(savedUser));
+                const parsedUser = JSON.parse(savedUser);
+                const normalizedUser = normalizeUser(parsedUser);
+                setUser(normalizedUser);
+                localStorage.setItem('user', JSON.stringify(normalizedUser));
             } catch (error) {
                 localStorage.removeItem('user');
             }
@@ -28,12 +49,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = (googleUser) => {
-        const userData = {
-            name: googleUser.name,
-            email: googleUser.email,
-            picture: googleUser.picture,
-            googleId: googleUser.sub,
-        };
+        const userData = normalizeUser(googleUser);
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
     };

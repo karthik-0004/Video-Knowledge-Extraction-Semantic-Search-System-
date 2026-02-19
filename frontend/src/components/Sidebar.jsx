@@ -6,9 +6,19 @@ import './Sidebar.css';
 
 export const Sidebar = () => {
     const { user, logout } = useAuth();
+    const [avatarError, setAvatarError] = useState(false);
     const [isDark, setIsDark] = useState(() => {
         return localStorage.getItem('theme') === 'dark';
     });
+
+    const getInitials = (name) => {
+        return (name || 'U')
+            .split(' ')
+            .map(part => part[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase();
+    };
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -58,11 +68,19 @@ export const Sidebar = () => {
                 <div className="user-profile-section">
                     {user && (
                         <div className="user-info">
-                            <img
-                                src={user.picture}
-                                alt={user.name}
-                                className="user-avatar"
-                            />
+                            {user.picture && !avatarError ? (
+                                <img
+                                    src={user.picture}
+                                    alt={user.name}
+                                    className="user-avatar"
+                                    referrerPolicy="no-referrer"
+                                    onError={() => setAvatarError(true)}
+                                />
+                            ) : (
+                                <div className="user-avatar user-avatar-fallback">
+                                    {getInitials(user.name)}
+                                </div>
+                            )}
                             <div className="user-details">
                                 <span className="user-name">{user.name}</span>
                                 <span className="user-email">{user.email}</span>

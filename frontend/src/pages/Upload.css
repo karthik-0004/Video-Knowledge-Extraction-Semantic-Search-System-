@@ -14,6 +14,112 @@
     letter-spacing: -0.02em;
 }
 
+.upload-mode-toggle {
+    display: inline-flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-1);
+}
+
+.mode-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.mode-btn.active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.mode-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.youtube-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+}
+
+.youtube-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
+    margin-bottom: var(--space-2);
+}
+
+.youtube-input-row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.youtube-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-sm);
+    margin-bottom: var(--space-4);
+}
+
+.youtube-input-row .youtube-input {
+    margin-bottom: 0;
+}
+
+.youtube-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.youtube-clear-btn {
+    flex-shrink: 0;
+}
+
+.youtube-error {
+    color: var(--error);
+    margin-top: calc(-1 * var(--space-2));
+    margin-bottom: var(--space-3);
+    font-size: var(--font-sm);
+}
+
+.youtube-submit-btn {
+    border: none;
+    background: var(--primary);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--font-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.youtube-submit-btn:hover:not(:disabled) {
+    filter: brightness(1.05);
+}
+
+.youtube-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* ── Dropzone ── */
 .dropzone {
     border: 2px dashed var(--border);

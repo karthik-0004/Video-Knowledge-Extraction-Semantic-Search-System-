@@ -30,6 +30,17 @@ export const videoAPI = {
         });
     },
 
+    // Start upload from YouTube URL (backend downloads to local disk first)
+    uploadYouTube: (youtubeUrl, title = '') =>
+        api.post('/videos/upload_youtube/', {
+            youtube_url: youtubeUrl,
+            title,
+        }),
+
+    // Poll YouTube download status
+    getYouTubeDownloadStatus: (taskId) =>
+        api.get(`/videos/youtube_status/?task_id=${encodeURIComponent(taskId)}`),
+
     // Get video status
     getVideoStatus: (id) => api.get(`/videos/${id}/status/`),
 

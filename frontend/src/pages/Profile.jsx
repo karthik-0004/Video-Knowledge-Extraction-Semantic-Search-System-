@@ -10,6 +10,7 @@ import './Profile.css';
 export const Profile = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [avatarError, setAvatarError] = useState(false);
     const [stats, setStats] = useState({
         total_videos: 0,
         total_queries: 0,
@@ -24,7 +25,7 @@ export const Profile = () => {
     }, []);
 
     const getInitials = (name) => {
-        return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        return (name || 'User').split(' ').map(n => n[0]).join('').toUpperCase();
     };
 
     const handleLogout = () => {
@@ -47,20 +48,25 @@ export const Profile = () => {
                 {/* Profile Header */}
                 <div className="profile-header-card">
                     <div className="profile-avatar-large">
-                        {user.picture ? (
-                            <img src={user.picture} alt={user.name} />
+                        {user?.picture && !avatarError ? (
+                            <img
+                                src={user.picture}
+                                alt={user?.name || 'User'}
+                                referrerPolicy="no-referrer"
+                                onError={() => setAvatarError(true)}
+                            />
                         ) : (
                             <div className="avatar-placeholder">
-                                {getInitials(user.name)}
+                                {getInitials(user?.name)}
                             </div>
                         )}
                     </div>
 
                     <div className="profile-header-info">
-                        <h2>{user.name}</h2>
+                        <h2>{user?.name || 'User'}</h2>
                         <p className="profile-email">
                             <Mail size={20} />
-                            {user.email}
+                            {user?.email || 'No email available'}
                         </p>
                         <div className="profile-badge">
                             <Shield size={16} />
