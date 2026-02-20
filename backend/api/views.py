@@ -170,7 +170,7 @@ class VideoViewSet(viewsets.ModelViewSet):
             user = self._get_or_create_default_user()
             final_title = custom_title or info.get('title') or os.path.splitext(file_name)[0]
 
-            video = Video(user=user, title=final_title, status='uploading')
+            video = Video(user=user, title=final_title, status='uploading', youtube_url=youtube_url)
             with open(downloaded_path, 'rb') as downloaded_file:
                 video.file.save(file_name, File(downloaded_file), save=False)
             video.save()
@@ -500,7 +500,10 @@ class VideoViewSet(viewsets.ModelViewSet):
             profile.total_queries += 1
             profile.save()
             
-            return Response(QuerySerializer(query_obj).data)
+            return Response({
+                **QuerySerializer(query_obj).data,
+                'youtube_url': video.youtube_url or '',
+            })
         
         except Exception as e:
             return Response(

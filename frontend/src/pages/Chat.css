@@ -19,6 +19,7 @@
     gap: var(--space-4);
     margin-bottom: var(--space-3);
     flex-shrink: 0;
+    flex-wrap: wrap;
 }
 
 .chat-header h2 {
@@ -26,14 +27,19 @@
     font-size: var(--font-h3);
     font-weight: 600;
     flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ── Chat Body — Split Layout Container ── */
 .chat-body {
     display: flex;
-    gap: var(--space-3);
+    gap: 0;
     flex: 1;
     min-height: 0;
+    overflow: hidden;
 }
 
 /* ── Left Panel (existing chat) ── */
@@ -42,32 +48,53 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    transition: all var(--transition-smooth);
+    min-width: 200px;
+    overflow: hidden;
+}
+
+/* ── Drag Divider ── */
+.chat-divider {
+    width: 8px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    flex-shrink: 0;
+    border-radius: 4px;
+    margin: 0 2px;
+    transition: background 0.2s ease, width 0.1s ease;
+    color: var(--text-tertiary);
+    user-select: none;
+    position: relative;
+    z-index: 10;
+}
+
+.chat-divider:hover {
+    background: var(--primary-muted);
+    color: var(--primary);
+    width: 10px;
+}
+
+.chat-divider:active {
+    background: var(--primary);
+    color: var(--text-on-primary);
 }
 
 /* ── Right Panel (AI chatbot) ── */
 .chat-right-panel {
-    width: 0;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
+    min-width: 200px;
     overflow: hidden;
-    opacity: 0;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.chat-split .chat-right-panel {
-    width: 72%;
-    flex-shrink: 0;
-    opacity: 1;
-}
-
-.chat-split .chat-left-panel {
-    flex: 1;
 }
 
 /* ── Chat Container ── */
 .chat-container {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 /* ── Messages ── */
@@ -78,6 +105,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    min-height: 0;
 }
 
 .empty-state {
@@ -226,6 +254,19 @@
     line-height: 1.2;
 }
 
+.ts-link {
+    font-size: 8px;
+    color: #818cf8;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: underline;
+    text-underline-offset: 1px;
+}
+
+.ts-neon:hover .ts-link {
+    color: #a5b4fc;
+}
+
 /* ── Typing Indicator ── */
 .typing-indicator {
     display: flex;
@@ -273,6 +314,7 @@
     border-top: 1px solid var(--border);
     background: var(--surface);
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    flex-shrink: 0;
 }
 
 .chat-input input {
@@ -297,12 +339,20 @@
         flex-direction: column;
     }
 
-    .chat-split .chat-right-panel {
+    .chat-divider {
         width: 100%;
-        height: 50%;
+        height: 8px;
+        cursor: row-resize;
+        flex-direction: row;
     }
 
     .chat-left-panel {
+        min-height: 300px;
+        width: 100% !important;
+    }
+
+    .chat-right-panel {
+        width: 100% !important;
         min-height: 300px;
     }
 }

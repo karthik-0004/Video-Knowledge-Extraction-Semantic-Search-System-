@@ -36,6 +36,9 @@ class Video(models.Model):
     audio_path = models.CharField(max_length=500, null=True, blank=True)
     json_path = models.CharField(max_length=500, null=True, blank=True)
     
+    # Source URL (for YouTube videos)
+    youtube_url = models.URLField(max_length=500, null=True, blank=True)
+    
     class Meta:
         ordering = ['-upload_date']
     

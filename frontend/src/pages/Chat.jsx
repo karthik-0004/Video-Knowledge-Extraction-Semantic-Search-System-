@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/AppLayout';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { AIChatPanel } from '../components/AIChatPanel';
 import { videoAPI } from '../services/api';
-import { ArrowLeft, Eraser, FileText, Send, Sparkles } from 'lucide-react';
+import { ArrowLeft, Eraser, FileText, Send, Sparkles, GripVertical } from 'lucide-react';
 import './Chat.css';
 
 export const Chat = () => {
@@ -19,6 +19,13 @@ export const Chat = () => {
     const [loading, setLoading] = useState(false);
     const [showAI, setShowAI] = useState(false);
     const messagesEndRef = useRef(null);
+
+    // Draggable divider state
+    const [leftWidth, setLeftWidth] = useState(40); // percent
+    const isDragging = useRef(false);
+    const dragStartX = useRef(0);
+    const dragStartWidth = useRef(40);
+    const chatBodyRef = useRef(null);
 
     useEffect(() => {
         videoAPI.getVideo(id)
@@ -64,10 +71,41 @@ export const Chat = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // Reset to 40/60 split when AI closes
+    useEffect(() => {
+        if (!showAI) {
+            setLeftWidth(40);
+        }
+    }, [showAI]);
+
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Build a YouTube URL that starts at the given second
+    const getYouTubeTimestampUrl = (youtubeUrl, secondsFloat) => {
+        if (!youtubeUrl || secondsFloat == null) return null;
+        const seconds = Math.floor(secondsFloat);
+        try {
+            // Handle youtu.be short links
+            if (youtubeUrl.includes('youtu.be/')) {
+                const videoId = youtubeUrl.split('youtu.be/')[1].split(/[?&#]/)[0];
+                return `https://www.youtube.com/watch?v=${videoId}&t=${seconds}s`;
+            }
+            // Handle youtube.com/watch?v=... links
+            const url = new URL(youtubeUrl);
+            const videoId = url.searchParams.get('v');
+            if (videoId) {
+                return `https://www.youtube.com/watch?v=${videoId}&t=${seconds}s`;
+            }
+        } catch (e) {
+            // fallback: append &t= directly
+            const base = youtubeUrl.split('&t=')[0].split('?t=')[0];
+            return `${base}${base.includes('?') ? '&' : '?'}t=${seconds}s`;
+        }
+        return null;
     };
 
     const getPdfUrl = (fileUrl) => {
@@ -107,7 +145,8 @@ export const Chat = () => {
                 role: 'assistant',
                 content: res.data.answer,
                 timestamp_start: res.data.timestamp_start,
-                timestamp_end: res.data.timestamp_end
+                timestamp_end: res.data.timestamp_end,
+                youtube_url: res.data.youtube_url || '',
             };
             setMessages(prev => [...prev, aiMessage]);
         } catch (err) {
@@ -128,6 +167,35 @@ export const Chat = () => {
         setMessages([]);
         localStorage.removeItem(chatStorageKey);
     };
+
+    // Drag handlers
+    const onDividerMouseDown = useCallback((e) => {
+        isDragging.current = true;
+        dragStartX.current = e.clientX;
+        dragStartWidth.current = leftWidth;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+
+        const onMouseMove = (e) => {
+            if (!isDragging.current || !chatBodyRef.current) return;
+            const bodyWidth = chatBodyRef.current.getBoundingClientRect().width;
+            const delta = e.clientX - dragStartX.current;
+            const deltaPercent = (delta / bodyWidth) * 100;
+            const newWidth = Math.min(70, Math.max(20, dragStartWidth.current + deltaPercent));
+            setLeftWidth(newWidth);
+        };
+
+        const onMouseUp = () => {
+            isDragging.current = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }, [leftWidth]);
 
     return (
         <AppLayout>
@@ -163,9 +231,12 @@ export const Chat = () => {
                     </Button>
                 </div>
 
-                <div className="chat-body">
+                <div className="chat-body" ref={chatBodyRef}>
                     {/* Left Panel — Existing video Q&A */}
-                    <Card className="chat-container chat-left-panel">
+                    <Card
+                        className="chat-container chat-left-panel"
+                        style={showAI ? { width: `${leftWidth}%`, flex: 'none' } : {}}
+                    >
                         <div className="messages">
                             {messages.length === 0 && (
                                 <div className="empty-state">
@@ -177,18 +248,32 @@ export const Chat = () => {
                                 <div key={idx} className={`message ${msg.role}`}>
                                     <div className="message-content">
                                         {msg.content}
-                                        {msg.timestamp_start && (
-                                            <div className="ts-neon">
-                                                <div className="ts-ring">
-                                                    <span className="ts-emoji">🕰️</span>
+                                        {msg.timestamp_start && (() => {
+                                            const ytUrl = getYouTubeTimestampUrl(msg.youtube_url, msg.timestamp_start);
+                                            const timeLabel = `${formatTime(msg.timestamp_start)} – ${formatTime(msg.timestamp_end)}`;
+                                            return (
+                                                <div
+                                                    className="ts-neon"
+                                                    onClick={ytUrl ? () => window.open(ytUrl, '_blank', 'noopener,noreferrer') : undefined}
+                                                    title={ytUrl ? `Open on YouTube at ${timeLabel}` : timeLabel}
+                                                    style={ytUrl ? { cursor: 'pointer' } : {}}
+                                                >
+                                                    <div className="ts-ring">
+                                                        <span className="ts-emoji">{ytUrl ? '▶️' : '🕰️'}</span>
+                                                    </div>
+                                                    <div className="ts-content">
+                                                        <span className="ts-label">{ytUrl ? 'Watch on YouTube' : 'Timestamp'}</span>
+                                                        <span className="ts-time">{timeLabel}</span>
+                                                        {ytUrl && (
+                                                            <span className="ts-link">Click to open ↗</span>
+                                                        )}
+                                                        {!ytUrl && (
+                                                            <span className="ts-video">{video?.title}</span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="ts-content">
-                                                    <span className="ts-label">Timestamp</span>
-                                                    <span className="ts-time">{formatTime(msg.timestamp_start)} – {formatTime(msg.timestamp_end)}</span>
-                                                    <span className="ts-video">{video?.title}</span>
-                                                </div>
-                                            </div>
-                                        )}
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             ))}
@@ -221,9 +306,23 @@ export const Chat = () => {
                         </div>
                     </Card>
 
+                    {/* Drag Divider — only when AI panel is open */}
+                    {showAI && (
+                        <div
+                            className="chat-divider"
+                            onMouseDown={onDividerMouseDown}
+                            title="Drag to resize panels"
+                        >
+                            <GripVertical size={14} />
+                        </div>
+                    )}
+
                     {/* Right Panel — AI Chatbot */}
                     {showAI && (
-                        <div className="chat-right-panel">
+                        <div
+                            className="chat-right-panel"
+                            style={{ flex: 1, minWidth: 0 }}
+                        >
                             <AIChatPanel videoId={id} onClose={() => setShowAI(false)} />
                         </div>
                     )}
