@@ -16,18 +16,13 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public route - Landing page */}
+          <Route path="/" element={<Landing />} />
+
           {/* Public route - Login page */}
           <Route path="/login" element={<Login />} />
 
-          {/* Redirect root to login - user must authenticate */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
           {/* All other routes are PROTECTED - require Google login */}
-          <Route path="/landing" element={
-            <ProtectedRoute>
-              <Landing />
-            </ProtectedRoute>
-          } />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />

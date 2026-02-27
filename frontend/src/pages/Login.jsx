@@ -18,7 +18,7 @@ export const Login = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/landing');
+            navigate('/dashboard');
         }
     }, [isAuthenticated, navigate]);
 
@@ -40,7 +40,7 @@ export const Login = () => {
             const response = await authAPI.googleLogin(credentialResponse.credential);
             login(response.data);
             setMessage(response.data?.message || 'Google login successful. Redirecting...');
-            navigate('/landing');
+            navigate('/dashboard');
         } catch (requestError) {
             const backendMessage = requestError?.response?.data?.error
                 || 'Google login failed. Please try again.';
@@ -90,7 +90,7 @@ export const Login = () => {
                 setMessage('Login successful. Redirecting...');
             }
 
-            navigate('/landing');
+            navigate('/dashboard');
         } catch (requestError) {
             const backendMessage = requestError?.response?.data?.error
                 || requestError?.response?.data?.email?.[0]

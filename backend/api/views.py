@@ -728,7 +728,7 @@ class AuthViewSet(viewsets.ViewSet):
             email=email,
             password=password,
         )
-        UserProfile.objects.get_or_create(user=user)
+        profile, _ = UserProfile.objects.get_or_create(user=user)
 
         token, _ = Token.objects.get_or_create(user=user)
         response_user = {
@@ -736,6 +736,7 @@ class AuthViewSet(viewsets.ViewSet):
             'username': user.email.split('@')[0],
             'email': user.email,
             'name': user.email.split('@')[0],
+            'picture': profile.picture or '',
         }
 
         return Response(
@@ -779,6 +780,7 @@ class AuthViewSet(viewsets.ViewSet):
             'username': authenticated_user.email.split('@')[0],
             'email': authenticated_user.email,
             'name': authenticated_user.email.split('@')[0],
+            'picture': profile.picture or '',
         }
 
         return Response(
@@ -870,10 +872,12 @@ class AuthViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def me(self, request):
         user = request.user
+        profile, _ = UserProfile.objects.get_or_create(user=user)
         response_user = {
             'id': user.id,
             'username': user.email.split('@')[0] if user.email else user.username,
             'email': user.email,
             'name': user.email.split('@')[0] if user.email else user.username,
+            'picture': profile.picture or '',
         }
         return Response({'user': response_user})

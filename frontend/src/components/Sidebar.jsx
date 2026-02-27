@@ -74,11 +74,14 @@ export const Sidebar = () => {
                                     alt={user.name}
                                     className="user-avatar"
                                     referrerPolicy="no-referrer"
-                                    onError={() => setAvatarError(true)}
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        setAvatarError(true);
+                                    }}
                                 />
                             ) : (
                                 <div className="user-avatar user-avatar-fallback">
-                                    {getInitials(user.name)}
+                                    <User size={20} />
                                 </div>
                             )}
                             <div className="user-details">

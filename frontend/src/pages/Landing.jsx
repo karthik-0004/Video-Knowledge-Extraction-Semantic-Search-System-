@@ -1,134 +1,121 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, Bot, Video, MessageCircle, FileText, ArrowRight, Activity, Clock3, ScanLine } from 'lucide-react';
 import './Landing.css';
 
 export const Landing = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
+    useEffect(() => {
+        // Simple intersection observer to add fade-up classes on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeUp 1s ease forwards';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        const elements = document.querySelectorAll('.text-content, .visual-placeholder');
+        elements.forEach((el) => {
+            el.style.opacity = '0'; // hide initially
+            observer.observe(el);
+        });
+
+        return () => {
+            elements.forEach(el => observer.unobserve(el));
+            observer.disconnect();
+        };
+    }, []);
+
+    const handleAccess = () => {
+        if (user) {
+            navigate('/dashboard');
+        } else {
+            navigate('/login');
+        }
+    };
+
     return (
-        <div className="landing">
-            <div className="landing-glow" />
-            <div className="landing-grid" />
-            <header className="landing-header">
-                <div className="landing-brand">
-                    <Sparkles size={18} />
-                    <span>VideoMind</span>
-                </div>
-                <div className="landing-user">
-                    <span>Welcome {user?.username || user?.email?.split('@')[0] || 'User'}</span>
-                    <Button size="sm" variant="secondary" onClick={() => navigate('/dashboard')}>
-                        Skip to Dashboard
-                    </Button>
-                </div>
-            </header>
+        <div className="landing-story">
+            {/* HERO SECTION */}
+            <section id="hero">
+                <div className="hero-bg"></div>
+                <div className="hero-content">
+                    <div className="hero-eyebrow">Enterprise Intelligence</div>
+                    <h1 className="hero-title">Video <span>Knowledge</span> Extraction</h1>
+                    <p className="hero-subtitle">Transform hours of video into immediately searchable semantic knowledge using advanced RAG and AI embeddings.</p>
 
-            <main className="landing-hero">
-                <div className="hero-left">
-                    <div className="hero-pill">
-                        <span className="hero-dot" />
-                        AI-Powered Video Knowledge Extraction
-                    </div>
-
-                    <h1>
-                        Turn Long Videos Into
-                        <span> Searchable Knowledge</span>
-                    </h1>
-
-                    <p>
-                        Upload lectures, tutorials, and recordings. VideoMind transcribes content,
-                        answers questions with context, and generates clean PDF notes for learning.
-                    </p>
-
-                    <div className="hero-actions">
-                        <Button size="lg" onClick={() => navigate('/dashboard')}>
-                            Explore Workspace
-                            <ArrowRight size={16} />
-                        </Button>
-                        <Button size="lg" variant="secondary" onClick={() => navigate('/upload')}>
-                            Upload First Video
-                        </Button>
-                    </div>
-
-                    <div className="hero-mini-stats">
-                        <div className="mini-stat-card">
-                            <Activity size={16} />
-                            <div>
-                                <strong>Real-Time Pipeline</strong>
-                                <span>Processing status visibility</span>
-                            </div>
-                        </div>
-                        <div className="mini-stat-card">
-                            <Clock3 size={16} />
-                            <div>
-                                <strong>Faster Revisions</strong>
-                                <span>Query, refine, and export quickly</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="hero-meta">
-                        <div>
-                            <strong>Video → AI → Answers</strong>
-                            <span>One streamlined workflow</span>
-                        </div>
-                    </div>
-
-                    <div className="workflow-track">
-                        <div className="track-step">
-                            <span>01</span>
-                            <p>Upload video source</p>
-                        </div>
-                        <div className="track-step">
-                            <span>02</span>
-                            <p>Ask contextual questions</p>
-                        </div>
-                        <div className="track-step">
-                            <span>03</span>
-                            <p>Export learning-ready PDF</p>
-                        </div>
-                    </div>
+                    <button onClick={handleAccess} className="btn-gateway">
+                        {user ? 'Access Dashboard' : 'Login / Register to Begin'}
+                    </button>
                 </div>
 
-                <div className="hero-right">
-                    <div className="feature-panel">
-                        <div className="feature-panel-head">
-                            <h3>Platform Overview</h3>
-                            <div className="live-chip">
-                                <ScanLine size={14} />
-                                <span>Live AI</span>
-                            </div>
-                        </div>
-                        <p>Everything needed to convert videos into useful, queryable knowledge.</p>
+                <div className="scroll-indicator">
+                    <div className="scroll-arrow"></div>
+                </div>
+            </section>
 
-                        <div className="feature-grid">
-                            <div className="feature-tile">
-                                <Video size={20} />
-                                <h4>Video Ingestion</h4>
-                                <span>YouTube + local upload support</span>
-                            </div>
-                            <div className="feature-tile">
-                                <Bot size={20} />
-                                <h4>AI Processing</h4>
-                                <span>Whisper transcription + embeddings</span>
-                            </div>
-                            <div className="feature-tile">
-                                <MessageCircle size={20} />
-                                <h4>Semantic Chat</h4>
-                                <span>Context-aware, timestamped answers</span>
-                            </div>
-                            <div className="feature-tile">
-                                <FileText size={20} />
-                                <h4>PDF Output</h4>
-                                <span>Auto-generated study material</span>
-                            </div>
-                        </div>
+            {/* THE INGESTION */}
+            <section id="processing" className="story-section">
+                <div className="section-inner split-layout">
+                    <div className="text-content">
+                        <span className="section-label">Step 01 • The Ingestion</span>
+                        <h2>From Audio to <br /><span style={{ color: 'var(--gold)' }}>Pure Context</span></h2>
+                        <div className="gold-line"></div>
+                        <p>Drop any video into our system. Our heavy-lifting backend automatically separates the audio stream and leverages cutting-edge speech models (Groq / Whisper) to draft highly accurate transcriptions.</p>
+                        <p>Every word is timestamped, ensuring that no piece of context is ever disconnected from its absolute position in the original video.</p>
+                    </div>
+                    <div className="visual-placeholder">
+                        <div className="icon-large">🎙️</div>
                     </div>
                 </div>
-            </main>
+            </section>
+
+            {/* THE EMBEDDING */}
+            <section id="embeddings" className="story-section" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="section-inner split-layout reverse">
+                    <div className="visual-placeholder">
+                        <div className="icon-large">🧠</div>
+                    </div>
+                    <div className="text-content">
+                        <span className="section-label">Step 02 • The Neural Mapping</span>
+                        <h2>Generating <br /><span style={{ color: 'var(--primary-light)' }}>Semantic Vectors</span></h2>
+                        <div className="gold-line"></div>
+                        <p>We don't just search for keywords. Your transcripts are fed into local Large Language Models (Ollama bge-m3) to generate multi-dimensional vector embeddings.</p>
+                        <p>This allows the system to understand the true <em>meaning</em> behind your documents, preparing them for highly intuitive Retrieval-Augmented Generation (RAG).</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* THE OUTPUT */}
+            <section id="rag" className="story-section">
+                <div className="section-inner split-layout">
+                    <div className="text-content">
+                        <span className="section-label">Step 03 • The Interaction</span>
+                        <h2>Ask Anything, <br /><span style={{ color: 'var(--gold-light)' }}>Anytime</span></h2>
+                        <div className="gold-line"></div>
+                        <p>Engage via a natural chat interface. Ask complex questions about the video's content, and our LLM will synthesize an answer specifically drawn from the context, citing the exact timestamps.</p>
+                        <p>Need comprehensive notes? Automatically export the generated insights directly into beautifully formatted study PDFs.</p>
+                    </div>
+                    <div className="visual-placeholder">
+                        <div className="icon-large">📚</div>
+                    </div>
+                </div>
+            </section>
+
+            {/* FINAL GATEWAY */}
+            <section id="gateway" className="story-section gateway-section">
+                <span className="section-label" style={{ justifyContent: 'center', display: 'flex' }}>Access Granted</span>
+                <h2>Ready to Unlock Your Content?</h2>
+                <div className="gold-line center"></div>
+                <p>Join the next generation of video content analysts. Log in to your decentralized dashboard to manage your video library and perform deep semantic queries.</p>
+                <button onClick={handleAccess} className="btn-gateway" style={{ animation: 'none' }}>
+                    {user ? 'Access Dashboard' : 'Login / Register to Begin'}
+                </button>
+            </section>
         </div>
     );
 };
