@@ -77,7 +77,7 @@ export const Dashboard = () => {
                     </Card>
 
                     <Card className="stat-card" hover onClick={() => navigate('/history')}>
-                        <Clock size={32} color="var(--success)" />
+                        <Clock size={32} color="var(--primary)" />
                         <div className="stat-value">
                             {videos.filter(v => {
                                 const today = new Date().toDateString();
@@ -89,13 +89,13 @@ export const Dashboard = () => {
                     </Card>
 
                     <Card className="stat-card">
-                        <MessageCircle size={32} color="var(--info)" />
+                        <MessageCircle size={32} color="var(--primary)" />
                         <div className="stat-value">{stats.total_queries}</div>
                         <div className="stat-label">Queries</div>
                     </Card>
 
                     <Card className="stat-card">
-                        <FileText size={32} color="var(--warning)" />
+                        <FileText size={32} color="var(--primary)" />
                         <div className="stat-value">{stats.total_pdfs}</div>
                         <div className="stat-label">PDFs</div>
                     </Card>

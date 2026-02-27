@@ -8,45 +8,45 @@
     --primary: #4F46E5;
     --primary-hover: #4338CA;
     --primary-light: #EEF2FF;
-    --primary-subtle: rgba(79, 70, 229, 0.08);
-    --primary-muted: rgba(79, 70, 229, 0.15);
+    --primary-subtle: rgba(79, 70, 229, 0.06);
+    --primary-muted: rgba(79, 70, 229, 0.14);
 
     /* ── Accent ── */
-    --accent: #06B6D4;
-    --accent-light: #ECFEFF;
+    --accent: #4F46E5;
+    --accent-light: #EEF2FF;
 
     /* ── Functional Colors ── */
     --success: #10B981;
     --success-light: #D1FAE5;
     --success-text: #065F46;
-    --warning: #F59E0B;
-    --warning-light: #FEF3C7;
-    --warning-text: #92400E;
+    --warning: #6B7280;
+    --warning-light: #F1F5F9;
+    --warning-text: #475569;
     --error: #EF4444;
     --error-light: #FEE2E2;
     --error-text: #991B1B;
-    --info: #3B82F6;
-    --info-light: #DBEAFE;
-    --info-text: #1E40AF;
+    --info: #4F46E5;
+    --info-light: #EEF2FF;
+    --info-text: #4338CA;
 
     /* ── Surfaces & Backgrounds ── */
-    --bg-primary: #F8FAFC;
+    --bg-primary: #F5F7FB;
     --bg-secondary: #F1F5F9;
-    --bg-tertiary: #E2E8F0;
+    --bg-tertiary: #E5EAF2;
     --surface: #FFFFFF;
     --surface-hover: #F8FAFC;
     --surface-raised: #FFFFFF;
     --surface-overlay: rgba(255, 255, 255, 0.85);
 
     /* ── Borders ── */
-    --border: #E2E8F0;
+    --border: #DDE3EC;
     --border-hover: #CBD5E1;
     --border-active: #4F46E5;
     --border-subtle: #F1F5F9;
 
     /* ── Text ── */
     --text-primary: #0F172A;
-    --text-secondary: #64748B;
+    --text-secondary: #6B7280;
     --text-tertiary: #94A3B8;
     --text-on-primary: #FFFFFF;
     --text-link: #4F46E5;
@@ -76,10 +76,10 @@
     --radius-full: 9999px;
 
     /* ── Shadows (layered, cool-tone) ── */
-    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    --shadow-xs: 0 1px 2px rgba(17, 24, 39, 0.03);
+    --shadow-sm: 0 1px 3px rgba(17, 24, 39, 0.05), 0 1px 2px rgba(17, 24, 39, 0.03);
+    --shadow-md: 0 4px 10px rgba(17, 24, 39, 0.06);
+    --shadow-lg: 0 10px 24px rgba(17, 24, 39, 0.08);
     --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
     --shadow-focus: 0 0 0 3px rgba(79, 70, 229, 0.15);
 
@@ -107,8 +107,8 @@
     --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
     /* ── Layout ── */
-    --sidebar-width: 170px;
-    --header-height: 44px;
+    --sidebar-width: 230px;
+    --header-height: 64px;
     --content-max-width: 1200px;
 }
 
@@ -124,25 +124,25 @@
     --primary-muted: rgba(129, 140, 248, 0.18);
 
     /* ── Accent ── */
-    --accent: #22D3EE;
-    --accent-light: rgba(34, 211, 238, 0.1);
+    --accent: #818CF8;
+    --accent-light: rgba(129, 140, 248, 0.12);
 
     /* ── Functional Colors ── */
     --success: #34D399;
     --success-light: rgba(52, 211, 153, 0.12);
     --success-text: #6EE7B7;
-    --warning: #FBBF24;
-    --warning-light: rgba(251, 191, 36, 0.12);
-    --warning-text: #FDE68A;
+    --warning: #9CA3AF;
+    --warning-light: rgba(148, 163, 184, 0.14);
+    --warning-text: #D1D5DB;
     --error: #F87171;
     --error-light: rgba(248, 113, 113, 0.12);
     --error-text: #FCA5A5;
-    --info: #60A5FA;
-    --info-light: rgba(96, 165, 250, 0.12);
-    --info-text: #93C5FD;
+    --info: #818CF8;
+    --info-light: rgba(129, 140, 248, 0.12);
+    --info-text: #C7D2FE;
 
     /* ── Surfaces & Backgrounds ── */
-    --bg-primary: #0B1120;
+    --bg-primary: #0B1220;
     --bg-secondary: #111827;
     --bg-tertiary: #1E293B;
     --surface: #151E2E;
@@ -169,5 +169,5 @@
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
-    --shadow-focus: 0 0 0 3px rgba(129, 140, 248, 0.25);
+    --shadow-focus: 0 0 0 3px rgba(129, 140, 248, 0.2);
 }

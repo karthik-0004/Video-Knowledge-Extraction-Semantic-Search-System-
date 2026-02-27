@@ -4,7 +4,7 @@
 .sidebar {
     width: var(--sidebar-width);
     height: 100vh;
-    background: var(--surface);
+    background: var(--bg-secondary);
     border-right: 1px solid var(--border);
     color: var(--text-primary);
     display: flex;
@@ -27,10 +27,10 @@
 }
 
 .sidebar-header h2 {
-    font-size: var(--font-body);
+    font-size: 1.125rem;
     margin: 0;
     color: var(--text-primary);
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: -0.01em;
 }
 
@@ -43,7 +43,7 @@
     height: 32px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    background: var(--bg-secondary);
+    background: var(--surface);
     color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -51,15 +51,15 @@
 }
 
 .theme-toggle:hover {
-    background: var(--primary-light);
+    background: var(--bg-primary);
     color: var(--primary);
-    border-color: var(--primary-muted);
+    border-color: var(--border-hover);
 }
 
 /* ── Navigation ── */
 .sidebar-nav {
     flex: 1;
-    padding: var(--space-3);
+    padding: var(--space-4) var(--space-3);
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
@@ -75,7 +75,7 @@
     color: var(--text-secondary);
     text-decoration: none;
     transition: all var(--transition-fast);
-    font-size: var(--font-sm);
+    font-size: 0.875rem;
     font-weight: 500;
     position: relative;
 }
@@ -87,14 +87,16 @@
 }
 
 .nav-item:hover {
-    background: var(--bg-secondary);
+    background: var(--surface);
     color: var(--text-primary);
 }
 
 .nav-item.active {
-    background: var(--primary-light);
+    background: var(--surface);
     color: var(--primary);
     font-weight: 600;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-xs);
 }
 
 [data-theme="dark"] .nav-item.active {
@@ -106,6 +108,7 @@
     margin-top: auto;
     padding: var(--space-4);
     border-top: 1px solid var(--border);
+    background: var(--surface);
 }
 
 .user-profile-section {
@@ -119,14 +122,14 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-3);
-    background: var(--bg-secondary);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
 }
 
 .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-full);
     border: 2px solid var(--border);
     object-fit: cover;
@@ -172,7 +175,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-3);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
@@ -184,9 +187,9 @@
 }
 
 .logout-btn:hover {
-    background: var(--error-light);
-    color: var(--error);
-    border-color: var(--error);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
 }
 
 .logout-btn svg {

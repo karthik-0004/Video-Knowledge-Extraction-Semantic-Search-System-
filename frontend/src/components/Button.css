@@ -10,7 +10,7 @@
     font-size: var(--font-sm);
     font-weight: 500;
     border-radius: var(--radius-md);
-    border: 1.5px solid transparent;
+    border: 1px solid transparent;
     cursor: pointer;
     transition: all var(--transition-base);
     text-decoration: none;
@@ -35,8 +35,7 @@
 .btn-primary:hover:not(:disabled) {
     background: var(--primary-hover);
     border-color: var(--primary-hover);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 /* ── Secondary ── */
@@ -49,20 +48,20 @@
 .btn-secondary:hover:not(:disabled) {
     background: var(--bg-secondary);
     border-color: var(--border-hover);
-    box-shadow: var(--shadow-sm);
+    color: var(--text-primary);
 }
 
 /* ── Danger ── */
 .btn-danger {
     background: var(--surface);
-    color: var(--error);
+    color: var(--text-secondary);
     border-color: var(--border);
 }
 
 .btn-danger:hover:not(:disabled) {
-    background: var(--error-light);
-    border-color: var(--error);
-    box-shadow: var(--shadow-sm);
+    background: var(--bg-secondary);
+    border-color: var(--border-hover);
+    color: var(--text-primary);
 }
 
 /* ── Ghost ── */

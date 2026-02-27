@@ -13,7 +13,7 @@ export const History = () => {
     const [currentFilter, setCurrentFilter] = useState({ days: 30, filter: 'month' });
     const [refreshing, setRefreshing] = useState(false);
 
-    const loadData = async (params = { days: 1 }) => {
+    const loadData = async (params = currentFilter) => {
         try {
             setLoading(true);
             const response = await videoAPI.getVideosByDate(params);

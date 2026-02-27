@@ -3,6 +3,7 @@ DRF Serializers for Video RAG API
 """
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from .models import Video, Query, PDF, UserProfile
 
 
@@ -90,3 +91,42 @@ class DailyVideosSerializer(serializers.Serializer):
     
     class Meta:
         fields = ['date', 'display_date', 'count', 'videos']
+
+
+class RegisterSerializer(serializers.Serializer):
+    """Serializer for user registration with email/password"""
+
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_email(self, value):
+        normalized_email = value.strip().lower()
+        if not normalized_email.endswith('@gmail.com'):
+            raise serializers.ValidationError('Please use a valid Gmail address.')
+
+        if User.objects.filter(email__iexact=normalized_email).exists():
+            raise serializers.ValidationError('This email is already registered. Please log in.')
+
+        return normalized_email
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({'confirm_password': 'Passwords do not match.'})
+
+        temp_user = User(email=attrs['email'], username=attrs['email'].split('@')[0])
+        validate_password(attrs['password'], temp_user)
+        return attrs
+
+
+class LoginSerializer(serializers.Serializer):
+    """Serializer for login with email/password"""
+
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+
+class GoogleLoginSerializer(serializers.Serializer):
+    """Serializer for Google credential login"""
+
+    credential = serializers.CharField(write_only=True)

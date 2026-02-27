@@ -41,13 +41,13 @@
     height: 72px;
     border-radius: var(--radius-full);
     border: 3px solid var(--border);
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    background: var(--primary-light);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
+    color: var(--primary);
     box-shadow: var(--shadow-sm);
 }
 
@@ -115,15 +115,14 @@
 
 .action-card:hover {
     border-color: var(--border-hover);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 .action-card-icon {
     width: 44px;
     height: 44px;
     background: var(--primary-light);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -159,6 +158,7 @@
 .stat-icon {
     font-size: 1.75rem;
     margin-bottom: var(--space-2);
+    filter: grayscale(1);
 }
 
 .stat-value {

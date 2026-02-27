@@ -35,7 +35,7 @@ export const Profile = () => {
     };
 
     const handleSwitchAccount = () => {
-        if (window.confirm('Switch to a different Google account? You will be logged out.')) {
+        if (window.confirm('Switch to a different account? You will be logged out.')) {
             logout();
         }
     };
@@ -70,7 +70,7 @@ export const Profile = () => {
                         </p>
                         <div className="profile-badge">
                             <Shield size={16} />
-                            Google Account Connected
+                            Secure Account Active
                         </div>
                     </div>
                 </div>
@@ -84,7 +84,7 @@ export const Profile = () => {
                                 <RefreshCw size={24} />
                             </div>
                             <h3>Switch Account</h3>
-                            <p>Sign out and login with a different Google account</p>
+                            <p>Sign out and log in with a different registered account</p>
                         </div>
 
                         <div className="action-card" onClick={handleLogout}>

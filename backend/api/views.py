@@ -4,17 +4,23 @@ API Views for Video RAG Application
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.authtoken.models import Token
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.core.files import File
 from .models import Video, Query, PDF, UserProfile
 from .serializers import (
     VideoSerializer, VideoListSerializer, QuerySerializer,
-    PDFSerializer, UserProfileSerializer, DailyVideosSerializer
+    PDFSerializer, UserProfileSerializer, DailyVideosSerializer,
+    RegisterSerializer, LoginSerializer, GoogleLoginSerializer
 )
 import os
 import logging
@@ -40,6 +46,7 @@ class VideoViewSet(viewsets.ModelViewSet):
     
     queryset = Video.objects.all()
     parser_classes = (MultiPartParser, FormParser, JSONParser)
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     
     def get_serializer_class(self):
         if self.action == 'list':
@@ -47,8 +54,7 @@ class VideoViewSet(viewsets.ModelViewSet):
         return VideoSerializer
     
     def get_queryset(self):
-        # TODO: Filter by user when auth is implemented
-        return Video.objects.all()
+        return Video.objects.filter(user=self.request.user)
 
     def _validate_video_file(self, file_name, file_size):
         """Validate uploaded/downloaded video metadata"""
@@ -60,14 +66,6 @@ class VideoViewSet(viewsets.ModelViewSet):
         file_ext = os.path.splitext(file_name)[1].lower()
         if file_ext not in allowed_extensions:
             raise ValueError(f"Invalid file type. Allowed: {', '.join(allowed_extensions)}")
-
-    def _get_or_create_default_user(self):
-        """Get fallback demo user until auth is fully implemented"""
-        user, _ = User.objects.get_or_create(
-            username='demo_user',
-            defaults={'email': 'demo@example.com'}
-        )
-        return user
 
     def _is_youtube_url(self, value):
         """Check if URL is from YouTube"""
@@ -99,7 +97,7 @@ class VideoViewSet(viewsets.ModelViewSet):
 
         return max(0, min(100, int(float(match.group(1)))))
 
-    def _run_youtube_download_task(self, task_id, youtube_url, custom_title):
+    def _run_youtube_download_task(self, task_id, youtube_url, custom_title, user_id):
         """Background task that downloads YouTube video and triggers processing"""
         temp_dir = None
         downloaded_path = None
@@ -167,7 +165,7 @@ class VideoViewSet(viewsets.ModelViewSet):
             file_size = os.path.getsize(downloaded_path)
             self._validate_video_file(file_name, file_size)
 
-            user = self._get_or_create_default_user()
+            user = User.objects.get(id=user_id)
             final_title = custom_title or info.get('title') or os.path.splitext(file_name)[0]
 
             video = Video(user=user, title=final_title, status='uploading', youtube_url=youtube_url)
@@ -185,6 +183,7 @@ class VideoViewSet(viewsets.ModelViewSet):
                 progress=100,
                 video_id=video.id,
                 title=video.title,
+                user_id=user.id,
             )
 
             logger.info(f"YouTube download task {task_id} created video ID: {video.id}")
@@ -216,11 +215,7 @@ class VideoViewSet(viewsets.ModelViewSet):
             
             logger.info(f"Uploading video: {uploaded_file.name}, size: {uploaded_file.size} bytes")
             
-            # TODO: Set user from request.user when auth is implemented
-            # For now, create or get a default user
-            user = self._get_or_create_default_user()
-            
-            video = serializer.save(user=user, status='uploading')
+            video = serializer.save(user=self.request.user, status='uploading')
             logger.info(f"Video created with ID: {video.id}, file path: {video.file.path}")
             
             # Trigger background processing
@@ -257,12 +252,13 @@ class VideoViewSet(viewsets.ModelViewSet):
                 'video_id': None,
                 'title': custom_title or '',
                 'error': None,
+                'user_id': request.user.id,
                 'created_at': datetime.now().isoformat(),
             }
 
         thread = threading.Thread(
             target=self._run_youtube_download_task,
-            args=(task_id, youtube_url, custom_title),
+            args=(task_id, youtube_url, custom_title, request.user.id),
             daemon=True,
         )
         thread.start()
@@ -290,27 +286,46 @@ class VideoViewSet(viewsets.ModelViewSet):
         if not task:
             return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        if task.get('user_id') != request.user.id:
+            return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+
         return Response(task)
     
     @action(detail=False, methods=['get'])
     def by_date(self, request):
         """Get videos grouped by upload date"""
         # Get query parameters
+        filter_type = request.query_params.get('filter')
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
+        single_date = request.query_params.get('date')
         days = request.query_params.get('days', 30)  # Default to last 30 days
+        today = timezone.localdate()
+        yesterday = today - timedelta(days=1)
         
         # Filter videos
-        queryset = Video.objects.all()
-        
-        if start_date and end_date:
+        queryset = Video.objects.filter(user=request.user)
+
+        if filter_type == 'today':
+            queryset = queryset.filter(upload_date__date=today)
+        elif filter_type == 'yesterday':
+            queryset = queryset.filter(upload_date__date=yesterday)
+        elif single_date:
+            queryset = queryset.filter(upload_date__date=single_date)
+        elif filter_type == 'all':
+            pass
+        elif start_date and end_date:
             queryset = queryset.filter(upload_date__date__gte=start_date, upload_date__date__lte=end_date)
         elif start_date:
             queryset = queryset.filter(upload_date__date__gte=start_date)
+        elif filter_type == 'week':
+            queryset = queryset.filter(upload_date__date__gte=today - timedelta(days=6))
+        elif filter_type == 'month':
+            queryset = queryset.filter(upload_date__date__gte=today - timedelta(days=29))
         else:
             # Default: last N days
-            start_date = datetime.now().date() - timedelta(days=int(days))
-            queryset = queryset.filter(upload_date__date__gte=start_date)
+            window_start = today - timedelta(days=max(1, int(days)) - 1)
+            queryset = queryset.filter(upload_date__date__gte=window_start)
         
         # Group by date
         videos_by_date = {}
@@ -322,8 +337,6 @@ class VideoViewSet(viewsets.ModelViewSet):
         
         # Format response
         result = []
-        today = datetime.now().date()
-        yesterday = today - timedelta(days=1)
         
         for date_str, videos in videos_by_date.items():
             date_obj = datetime.fromisoformat(date_str).date()
@@ -349,10 +362,11 @@ class VideoViewSet(viewsets.ModelViewSet):
     def daily_stats(self, request):
         """Get daily conversion statistics"""
         days = int(request.query_params.get('days', 30))
-        start_date = datetime.now().date() - timedelta(days=days)
+        start_date = timezone.localdate() - timedelta(days=days)
         
         # Get videos grouped by date with counts
         stats = Video.objects.filter(
+            user=request.user,
             upload_date__date__gte=start_date
         ).annotate(
             date=TruncDate('upload_date')
@@ -362,7 +376,7 @@ class VideoViewSet(viewsets.ModelViewSet):
         
         # Format response
         result = []
-        today = datetime.now().date()
+        today = timezone.localdate()
         yesterday = today - timedelta(days=1)
         
         for stat in stats:
@@ -390,7 +404,7 @@ class VideoViewSet(viewsets.ModelViewSet):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
-        queryset = Video.objects.all()
+        queryset = Video.objects.filter(user=request.user)
         
         if date:
             # Single date
@@ -485,7 +499,7 @@ class VideoViewSet(viewsets.ModelViewSet):
             result = query_video(video.id, question)
             
             # Save query to database
-            user = video.user  # TODO: use request.user when auth is implemented
+            user = request.user
             query_obj = Query.objects.create(
                 user=user,
                 video=video,
@@ -643,37 +657,28 @@ class QueryViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Query history"""
     
     serializer_class = QuerySerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     
     def get_queryset(self):
-        # TODO: Filter by user when auth is implemented
         video_id = self.request.query_params.get('video_id')
         if video_id:
-            return Query.objects.filter(video_id=video_id)
-        return Query.objects.all()
+            return Query.objects.filter(video_id=video_id, user=self.request.user)
+        return Query.objects.filter(user=self.request.user)
 
 
 class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for User Profile stats"""
     
     serializer_class = UserProfileSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     
     def get_queryset(self):
-        # TODO: Filter by user when auth is implemented
-        return UserProfile.objects.all()
+        return UserProfile.objects.filter(user=self.request.user)
     
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get current user's statistics"""
-        # TODO: Use request.user when auth is implemented
-        user = User.objects.filter(username='demo_user').first()
-        
-        if not user:
-            return Response({
-                'total_videos': 0,
-                'total_queries': 0,
-                'total_pdfs': 0,
-                'total_processing_hours': 0.0,
-            })
+        user = request.user
         
         profile, _ = UserProfile.objects.get_or_create(user=user)
         
@@ -687,3 +692,188 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
         profile.save()
         
         return Response(UserProfileSerializer(profile).data)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AuthViewSet(viewsets.ViewSet):
+    """Email/password authentication endpoints"""
+
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+
+    def get_permissions(self):
+        if self.action in ['register', 'login', 'google_login']:
+            return [AllowAny()]
+        return super().get_permissions()
+
+    def _unique_username(self, email):
+        base_username = email.split('@')[0]
+        username = base_username
+        suffix = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{suffix}"
+            suffix += 1
+        return username
+
+    @action(detail=False, methods=['post'])
+    def register(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
+        username = self._unique_username(email)
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+        )
+        UserProfile.objects.get_or_create(user=user)
+
+        token, _ = Token.objects.get_or_create(user=user)
+        response_user = {
+            'id': user.id,
+            'username': user.email.split('@')[0],
+            'email': user.email,
+            'name': user.email.split('@')[0],
+        }
+
+        return Response(
+            {
+                'message': 'Registration successful.',
+                'token': token.key,
+                'user': response_user,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email'].strip().lower()
+        password = serializer.validated_data['password']
+
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            return Response(
+                {'error': 'Register first with this email before logging in.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        authenticated_user = authenticate(request, username=user.username, password=password)
+        if not authenticated_user:
+            return Response(
+                {'error': 'Incorrect password. Please try again.'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        token, _ = Token.objects.get_or_create(user=authenticated_user)
+        profile, _ = UserProfile.objects.get_or_create(user=authenticated_user)
+        profile.last_login = timezone.now()
+        profile.save(update_fields=['last_login'])
+
+        response_user = {
+            'id': authenticated_user.id,
+            'username': authenticated_user.email.split('@')[0],
+            'email': authenticated_user.email,
+            'name': authenticated_user.email.split('@')[0],
+        }
+
+        return Response(
+            {
+                'message': 'Login successful.',
+                'token': token.key,
+                'user': response_user,
+            }
+        )
+
+    @action(detail=False, methods=['post'])
+    def google_login(self, request):
+        serializer = GoogleLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        credential = serializer.validated_data['credential']
+
+        try:
+            import jwt
+            decoded = jwt.decode(credential, options={"verify_signature": False})
+        except Exception:
+            return Response(
+                {'error': 'Invalid Google credential.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        email = (decoded.get('email') or '').strip().lower()
+        if not email:
+            return Response(
+                {'error': 'Google account email not available.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not email.endswith('@gmail.com'):
+            return Response(
+                {'error': 'Please use a valid Gmail account.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        name = decoded.get('name') or email.split('@')[0]
+        picture = decoded.get('picture') or ''
+        google_sub = decoded.get('sub') or ''
+
+        user = User.objects.filter(email__iexact=email).first()
+        created = False
+        if not user:
+            created = True
+            username = self._unique_username(email)
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                first_name=name,
+                password=User.objects.make_random_password(length=20),
+            )
+
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if google_sub and profile.google_id != google_sub:
+            profile.google_id = google_sub
+        if picture:
+            profile.picture = picture
+        profile.last_login = timezone.now()
+        profile.save()
+
+        token, _ = Token.objects.get_or_create(user=user)
+        response_user = {
+            'id': user.id,
+            'username': user.email.split('@')[0],
+            'email': user.email,
+            'name': user.email.split('@')[0],
+            'picture': profile.picture,
+        }
+
+        return Response(
+            {
+                'message': 'Registration successful with Google.' if created else 'Login successful with Google.',
+                'token': token.key,
+                'user': response_user,
+                'is_new_user': created,
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
+        if request.auth:
+            request.auth.delete()
+        return Response({'message': 'Logged out successfully.'})
+
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        user = request.user
+        response_user = {
+            'id': user.id,
+            'username': user.email.split('@')[0] if user.email else user.username,
+            'email': user.email,
+            'name': user.email.split('@')[0] if user.email else user.username,
+        }
+        return Response({'user': response_user})

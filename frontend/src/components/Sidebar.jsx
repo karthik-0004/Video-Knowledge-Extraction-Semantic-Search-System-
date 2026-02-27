@@ -41,7 +41,7 @@ export const Sidebar = () => {
     return (
         <div className="sidebar">
             <div className="sidebar-header">
-                <h2>🎥 VideoMind</h2>
+                <h2>VideoMind</h2>
                 <button
                     className="theme-toggle"
                     onClick={() => setIsDark(!isDark)}

@@ -136,8 +136,7 @@
 .dropzone.active {
     border-color: var(--primary);
     background: var(--primary-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .dropzone svg {
@@ -200,7 +199,7 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    background: var(--primary);
     transition: width var(--transition-smooth);
     border-radius: var(--radius-full);
 }

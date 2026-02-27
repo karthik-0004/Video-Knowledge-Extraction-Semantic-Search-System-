@@ -1,46 +1,108 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
 import { useAuth } from '../context/AuthContext';
-import { SplashScreen } from '../components/SplashScreen';
+import { authAPI } from '../services/api';
+import { ShieldCheck, Mail, Lock, UserPlus, LogIn } from 'lucide-react';
 import './Login.css';
 
 export const Login = () => {
-    const { login, isAuthenticated } = useAuth();
+    const { login, register, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    const [showSplash, setShowSplash] = useState(false);
+    const [mode, setMode] = useState('login');
+    const [form, setForm] = useState({ email: '', password: '', confirmPassword: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+    const [googleLoading, setGoogleLoading] = useState(false);
 
     useEffect(() => {
-        if (isAuthenticated && !showSplash) {
-            navigate('/dashboard');
+        if (isAuthenticated) {
+            navigate('/landing');
         }
-    }, [isAuthenticated, navigate, showSplash]);
+    }, [isAuthenticated, navigate]);
 
-    const handleSuccess = (credentialResponse) => {
+    const handleChange = (field, value) => {
+        setForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setError('');
+        setMessage('');
+
+        if (!credentialResponse?.credential) {
+            setError('Google login failed. Please try again.');
+            return;
+        }
+
         try {
-            const decoded = jwtDecode(credentialResponse.credential);
-            login(decoded);
-            // Show splash screen instead of immediate navigation
-            setShowSplash(true);
-        } catch (error) {
-            console.error('Login failed:', error);
+            setGoogleLoading(true);
+            const response = await authAPI.googleLogin(credentialResponse.credential);
+            login(response.data);
+            setMessage(response.data?.message || 'Google login successful. Redirecting...');
+            navigate('/landing');
+        } catch (requestError) {
+            const backendMessage = requestError?.response?.data?.error
+                || 'Google login failed. Please try again.';
+            setError(backendMessage);
+        } finally {
+            setGoogleLoading(false);
         }
     };
 
-    const handleError = () => {
-        console.error('Google Login Failed');
+    const handleGoogleError = () => {
+        setError('Google login failed. Please try again.');
     };
 
-    const handleSplashComplete = () => {
-        setShowSplash(false);
-        navigate('/dashboard');
-    };
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setError('');
+        setMessage('');
 
-    // Show splash screen during transition
-    if (showSplash) {
-        return <SplashScreen onComplete={handleSplashComplete} />;
-    }
+        const email = form.email.trim().toLowerCase();
+        const password = form.password;
+
+        if (!email || !password) {
+            setError('Email and password are required.');
+            return;
+        }
+
+        if (!email.endsWith('@gmail.com')) {
+            setError('Please use a valid Gmail address.');
+            return;
+        }
+
+        if (mode === 'register' && form.confirmPassword !== password) {
+            setError('Passwords do not match.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            if (mode === 'register') {
+                const response = await authAPI.register(email, password, form.confirmPassword);
+                register(response.data);
+                setMessage('Registration complete. Welcome to VideoMind.');
+            } else {
+                const response = await authAPI.login(email, password);
+                login(response.data);
+                setMessage('Login successful. Redirecting...');
+            }
+
+            navigate('/landing');
+        } catch (requestError) {
+            const backendMessage = requestError?.response?.data?.error
+                || requestError?.response?.data?.email?.[0]
+                || requestError?.response?.data?.confirm_password?.[0]
+                || requestError?.response?.data?.password?.[0]
+                || 'Authentication failed. Please try again.';
+
+            setError(backendMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -48,43 +110,119 @@ export const Login = () => {
                 <div className="login-container">
                     <div className="login-card">
                         <div className="login-header">
-                            <div className="login-logo">🎥</div>
-                            <h1>Welcome to VideoMind</h1>
-                            <p>Transform your videos into knowledge with AI-powered insights</p>
+                            <div className="login-logo">
+                                <ShieldCheck size={36} />
+                            </div>
+                            <h1>VideoMind Workspace Access</h1>
+                            <p>Secure SaaS authentication for your personal video conversion history</p>
                         </div>
 
-                        <div className="login-content">
-                            <div className="login-features">
-                                <div className="feature-item">
-                                    <span className="feature-icon">🎥</span>
-                                    <span>Upload & Process Videos</span>
-                                </div>
-                                <div className="feature-item">
-                                    <span className="feature-icon">💬</span>
-                                    <span>Ask Questions</span>
-                                </div>
-                                <div className="feature-item">
-                                    <span className="feature-icon">📄</span>
-                                    <span>Generate PDFs</span>
-                                </div>
-                            </div>
+                        <div className="auth-toggle">
+                            <button
+                                type="button"
+                                className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
+                                onClick={() => {
+                                    setMode('login');
+                                    setError('');
+                                    setMessage('');
+                                }}
+                            >
+                                <LogIn size={16} /> Login
+                            </button>
+                            <button
+                                type="button"
+                                className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
+                                onClick={() => {
+                                    setMode('register');
+                                    setError('');
+                                    setMessage('');
+                                }}
+                            >
+                                <UserPlus size={16} /> Register
+                            </button>
+                        </div>
 
-                            <div className="google-login-wrapper">
-                                <p className="login-instruction">Sign in with your Google account to continue</p>
-                                <GoogleLogin
-                                    onSuccess={handleSuccess}
-                                    onError={handleError}
-                                    size="large"
-                                    theme="outline"
-                                    text="signin_with"
-                                    shape="rectangular"
+                        <div className="google-auth-block">
+                            <p>Or continue with Google</p>
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={handleGoogleError}
+                                size="large"
+                                theme="outline"
+                                text="continue_with"
+                                shape="rectangular"
+                                width="320"
+                            />
+                            {googleLoading && <span className="google-loading">Verifying Google account...</span>}
+                        </div>
+
+                        <form className="login-content" onSubmit={handleSubmit}>
+                            <label className="auth-label" htmlFor="email">
+                                Gmail Address
+                            </label>
+                            <div className="auth-input-wrap">
+                                <Mail size={16} />
+                                <input
+                                    id="email"
+                                    type="email"
+                                    placeholder="you@gmail.com"
+                                    value={form.email}
+                                    onChange={(event) => handleChange('email', event.target.value)}
+                                    autoComplete="email"
                                 />
                             </div>
 
+                            <label className="auth-label" htmlFor="password">
+                                Password
+                            </label>
+                            <div className="auth-input-wrap">
+                                <Lock size={16} />
+                                <input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Enter your password"
+                                    value={form.password}
+                                    onChange={(event) => handleChange('password', event.target.value)}
+                                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                                />
+                            </div>
+
+                            {mode === 'register' && (
+                                <>
+                                    <label className="auth-label" htmlFor="confirmPassword">
+                                        Confirm Password
+                                    </label>
+                                    <div className="auth-input-wrap">
+                                        <Lock size={16} />
+                                        <input
+                                            id="confirmPassword"
+                                            type="password"
+                                            placeholder="Re-enter password"
+                                            value={form.confirmPassword}
+                                            onChange={(event) => handleChange('confirmPassword', event.target.value)}
+                                            autoComplete="new-password"
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {error && <div className="auth-error">{error}</div>}
+                            {message && <div className="auth-success">{message}</div>}
+
+                            <button type="submit" className="auth-submit-btn" disabled={loading}>
+                                {loading
+                                    ? 'Please wait...'
+                                    : mode === 'register'
+                                        ? 'Create Account'
+                                        : 'Login to Workspace'}
+                            </button>
+
                             <p className="login-note">
-                                By signing in, you agree to use this application responsibly
+                                {mode === 'register'
+                                    ? 'Already registered? Switch to Login and enter your email/password.'
+                                    : 'New user? Register first using your Gmail/password or continue with Google.'}
                             </p>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>

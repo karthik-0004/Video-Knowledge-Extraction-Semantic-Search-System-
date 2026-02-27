@@ -4,7 +4,7 @@ import { Calendar, Clock, Filter } from 'lucide-react';
 import './DateNavigator.css';
 
 export const DateNavigator = ({ onDateChange, selectedRange }) => {
-    const [activeFilter, setActiveFilter] = useState('month');
+    const [activeFilter, setActiveFilter] = useState(selectedRange?.filter || 'month');
     const [showCustom, setShowCustom] = useState(false);
     const [customDate, setCustomDate] = useState('');
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -21,7 +21,7 @@ export const DateNavigator = ({ onDateChange, selectedRange }) => {
                 days = 1;
                 break;
             case 'yesterday':
-                days = 2;
+                days = 1;
                 break;
             case 'week':
                 days = 7;
@@ -46,12 +46,12 @@ export const DateNavigator = ({ onDateChange, selectedRange }) => {
 
     const handleDateSubmit = () => {
         if (customDate) {
-            onDateChange({ date: customDate, filter: 'custom' });
+            onDateChange({ date: customDate, filter: 'custom', days: 1 });
         } else if (dateRange.start && dateRange.end) {
             onDateChange({
                 start_date: dateRange.start,
                 end_date: dateRange.end,
-                filter: 'custom'
+                filter: 'custom',
             });
         }
     };

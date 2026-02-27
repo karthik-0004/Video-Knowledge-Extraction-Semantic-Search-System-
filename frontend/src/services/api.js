@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000/api';
+const TOKEN_STORAGE_KEY = 'authToken';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -8,6 +9,61 @@ const api = axios.create({
         'Content-Type': 'application/json',
     },
 });
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (token) {
+        config.headers.Authorization = `Token ${token}`;
+    }
+    return config;
+});
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error?.response?.status;
+        const requestUrl = error?.config?.url || '';
+        const isAuthEndpoint = requestUrl.includes('/auth/');
+
+        if (status === 401 && !isAuthEndpoint) {
+            localStorage.removeItem(TOKEN_STORAGE_KEY);
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+export const authAPI = {
+    register: (email, password, confirmPassword) =>
+        api.post('/auth/register/', {
+            email,
+            password,
+            confirm_password: confirmPassword,
+        }),
+
+    login: (email, password) =>
+        api.post('/auth/login/', {
+            email,
+            password,
+        }),
+
+    googleLogin: (credential) =>
+        api.post('/auth/google_login/', {
+            credential,
+        }),
+
+    logout: () => api.post('/auth/logout/'),
+
+    getMe: () => api.get('/auth/me/'),
+};
+
+export const authStorage = {
+    setToken: (token) => localStorage.setItem(TOKEN_STORAGE_KEY, token),
+    getToken: () => localStorage.getItem(TOKEN_STORAGE_KEY),
+    clearToken: () => localStorage.removeItem(TOKEN_STORAGE_KEY),
+};
 
 export const videoAPI = {
     // Get all videos
@@ -56,6 +112,8 @@ export const videoAPI = {
     // Daily tracking endpoints
     getVideosByDate: (params = {}) => {
         const queryParams = new URLSearchParams();
+        if (params.filter) queryParams.append('filter', params.filter);
+        if (params.date) queryParams.append('date', params.date);
         if (params.start_date) queryParams.append('start_date', params.start_date);
         if (params.end_date) queryParams.append('end_date', params.end_date);
         if (params.days) queryParams.append('days', params.days);

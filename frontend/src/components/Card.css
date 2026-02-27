@@ -5,7 +5,7 @@
     background: var(--surface);
     border-radius: var(--radius-lg);
     padding: var(--space-5);
-    box-shadow: var(--shadow-xs);
+    box-shadow: var(--shadow-sm);
     transition: all var(--transition-base);
     border: 1px solid var(--border);
 }
@@ -17,7 +17,6 @@
 .card-hover:hover {
     border-color: var(--border-hover);
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
 }
 
 /* Flat variant */
